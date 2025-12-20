@@ -168,6 +168,11 @@ export default function App() {
   };
 
   const [view, setView] = useState(getInitialView);
+  const [templates, setTemplates] = useState(() => loadSavedData('templates', []));
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showLoadTemplateModal, setShowLoadTemplateModal] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState('');
+  
   const [customerName, setCustomerName] = useState(() => loadSavedData('customerName', ''));
   const [customerAddress, setCustomerAddress] = useState(() => loadSavedData('customerAddress', ''));
   const [customerAddressLine2, setCustomerAddressLine2] = useState(() => loadSavedData('customerAddressLine2', ''));
@@ -233,10 +238,11 @@ export default function App() {
     saveData('customIntegrations', customIntegrations);
     saveData('customFees', customFees);
     saveData('minimumUsage', minimumUsage);
+    saveData('templates', templates);
   }, [customerName, customerAddress, customerAddressLine2, customerContact, customerEmail,
       billingSame, billingBillTo, billingAddress, billingAddressLine2, billingEmail,
       quoteDate, expiryDate, startDate, initialTerm, renewalTerm, paymentTerms, billingFrequency,
-      planName, planDescription, products, integrations, additionalFees, customIntegrations, customFees, minimumUsage]);
+      planName, planDescription, products, integrations, additionalFees, customIntegrations, customFees, minimumUsage, templates]);
 
   // Update URL when view changes
   const changeView = (newView) => {
@@ -297,6 +303,84 @@ export default function App() {
     }
   };
 
+  // Save current form as template (pricing & terms only, not customer info)
+  const saveAsTemplate = () => {
+    if (!newTemplateName.trim()) return;
+    
+    const template = {
+      id: `template-${Date.now()}`,
+      name: newTemplateName.trim(),
+      createdAt: new Date().toISOString(),
+      data: {
+        initialTerm,
+        renewalTerm,
+        paymentTerms,
+        billingFrequency,
+        planName,
+        planDescription,
+        products,
+        integrations,
+        additionalFees,
+        customIntegrations,
+        customFees,
+        minimumUsage,
+      }
+    };
+    
+    setTemplates(prev => [...prev, template]);
+    setNewTemplateName('');
+    setShowTemplateModal(false);
+  };
+
+  // Load a template
+  const loadTemplate = (template) => {
+    const { data } = template;
+    setInitialTerm(data.initialTerm);
+    setRenewalTerm(data.renewalTerm);
+    setPaymentTerms(data.paymentTerms);
+    setBillingFrequency(data.billingFrequency);
+    setPlanName(data.planName);
+    setPlanDescription(data.planDescription);
+    setProducts(data.products);
+    setIntegrations(data.integrations);
+    setAdditionalFees(data.additionalFees);
+    setCustomIntegrations(data.customIntegrations);
+    setCustomFees(data.customFees);
+    setMinimumUsage(data.minimumUsage);
+    setShowLoadTemplateModal(false);
+  };
+
+  // Delete a template
+  const deleteTemplate = (templateId) => {
+    if (window.confirm('Are you sure you want to delete this template?')) {
+      setTemplates(prev => prev.filter(t => t.id !== templateId));
+    }
+  };
+
+  // Clone/Duplicate - keep pricing, clear customer info
+  const cloneAsNewForm = () => {
+    // Clear customer info
+    setCustomerName('');
+    setCustomerAddress('');
+    setCustomerAddressLine2('');
+    setCustomerContact('');
+    setCustomerEmail('');
+    setBillingSame(false);
+    setBillingBillTo('');
+    setBillingAddress('');
+    setBillingAddressLine2('');
+    setBillingEmail('');
+    
+    // Reset dates
+    setQuoteDate(new Date().toISOString().split('T')[0]);
+    setExpiryDate('');
+    setStartDate('');
+    
+    // Keep everything else (pricing, products, terms, etc.)
+    // Switch to input view
+    changeView('input');
+  };
+
   const handleBillingSameAsCustomer = (checked) => {
     setBillingSame(checked);
     if (checked) {
@@ -321,14 +405,88 @@ export default function App() {
     <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between mb-6">
         <FolioLogo />
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <h1 className="text-xl font-semibold text-gray-800">Order Form Generator</h1>
+          <button type="button" onClick={() => setShowLoadTemplateModal(true)}
+            className="px-3 py-1 text-sm text-orange-600 border border-orange-300 rounded hover:bg-orange-50">
+            Load Template
+          </button>
+          <button type="button" onClick={() => setShowTemplateModal(true)}
+            className="px-3 py-1 text-sm text-blue-600 border border-blue-300 rounded hover:bg-blue-50">
+            Save as Template
+          </button>
           <button type="button" onClick={clearAllData}
             className="px-3 py-1 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50">
             Clear All
           </button>
         </div>
       </div>
+
+      {/* Save Template Modal */}
+      {showTemplateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
+            <h2 className="text-lg font-semibold mb-4">Save as Template</h2>
+            <p className="text-sm text-gray-600 mb-4">This will save your current pricing, products, and terms. Customer information will not be saved.</p>
+            <input
+              type="text"
+              value={newTemplateName}
+              onChange={e => setNewTemplateName(e.target.value)}
+              placeholder="Template name (e.g., Pilot Package)"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded mb-4 focus:outline-none focus:ring-1 focus:ring-orange-500"
+            />
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => { setShowTemplateModal(false); setNewTemplateName(''); }}
+                className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50">
+                Cancel
+              </button>
+              <button type="button" onClick={saveAsTemplate}
+                className="px-4 py-2 text-sm text-white bg-orange-500 rounded hover:bg-orange-600">
+                Save Template
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Load Template Modal */}
+      {showLoadTemplateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-[500px] shadow-xl max-h-[80vh] overflow-auto">
+            <h2 className="text-lg font-semibold mb-4">Load Template</h2>
+            {templates.length === 0 ? (
+              <p className="text-sm text-gray-500 mb-4">No templates saved yet. Create one by filling out the form and clicking "Save as Template".</p>
+            ) : (
+              <div className="space-y-2 mb-4">
+                {templates.map(template => (
+                  <div key={template.id} className="flex items-center justify-between p-3 border border-gray-200 rounded hover:bg-gray-50">
+                    <div>
+                      <p className="font-medium text-sm">{template.name}</p>
+                      <p className="text-xs text-gray-500">Created {new Date(template.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => loadTemplate(template)}
+                        className="px-3 py-1 text-sm text-white bg-orange-500 rounded hover:bg-orange-600">
+                        Load
+                      </button>
+                      <button type="button" onClick={() => deleteTemplate(template.id)}
+                        className="px-3 py-1 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex justify-end">
+              <button type="button" onClick={() => setShowLoadTemplateModal(false)}
+                className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-6">
         <InputSection title="Customer Information">
@@ -667,6 +825,10 @@ export default function App() {
         <div className="max-w-4xl mx-auto p-8">
           <button type="button" onClick={() => changeView('input')} className="mb-4 text-sm text-orange-600 hover:text-orange-700 font-medium print:hidden">
             ← Back to Editor
+          </button>
+          
+          <button type="button" onClick={cloneAsNewForm} className="mb-4 ml-4 text-sm text-blue-600 hover:text-blue-700 font-medium print:hidden">
+            Clone for New Customer
           </button>
 
           <div className="flex justify-between items-start mb-8 pb-4 border-b-2 border-gray-100">
