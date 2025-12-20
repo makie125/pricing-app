@@ -1,15 +1,16 @@
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-```
-
-## File structure should look like:
-```
-pricing-app/
-├── public/
-│   └── favicon.svg    <-- Add this new file
-├── src/
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── index.css
-├── index.html
-├── package.json
-└── ...
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Row 1: all filled -->
+  <rect x="5" y="5" width="26" height="26" rx="4" fill="#EA580C"/>
+  <rect x="37" y="5" width="26" height="26" rx="4" fill="#EA580C"/>
+  <rect x="69" y="5" width="26" height="26" rx="4" fill="#EA580C"/>
+  
+  <!-- Row 2: 2 filled, 1 outline -->
+  <rect x="5" y="37" width="26" height="26" rx="4" fill="#EA580C"/>
+  <rect x="37" y="37" width="26" height="26" rx="4" fill="#EA580C"/>
+  <rect x="69" y="37" width="26" height="26" rx="4" fill="none" stroke="#EA580C" stroke-width="4"/>
+  
+  <!-- Row 3: 1 filled, 2 outline -->
+  <rect x="5" y="69" width="26" height="26" rx="4" fill="#EA580C"/>
+  <rect x="37" y="69" width="26" height="26" rx="4" fill="none" stroke="#EA580C" stroke-width="4"/>
+  <rect x="69" y="69" width="26" height="26" rx="4" fill="none" stroke="#EA580C" stroke-width="4"/>
+</svg>
