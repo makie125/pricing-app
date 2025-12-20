@@ -494,6 +494,7 @@ export default function App() {
                   <option value="/year">/year</option>
                   <option value="/property">/property</option>
                   <option value="/mo">/mo</option>
+                  <option value=" (one-time)">One-time fee</option>
                 </select>
               </div>
             </div>
@@ -578,6 +579,7 @@ export default function App() {
                   <option value="/year">/year</option>
                   <option value="/property">/property</option>
                   <option value="/mo">/mo</option>
+                  <option value=" (one-time)">One-time fee</option>
                 </select>
               </div>
             </div>
