@@ -582,31 +582,31 @@ export default function App() {
           </div>
 
           {(planName || planDescription) && (
-            <div className="border-l-4 border-orange-500 mb-6">
+            <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
               <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Package</h2>
               <div className="px-4 py-3 space-y-2">
-                <div className="grid grid-cols-3 text-sm"><span className="font-medium">Plan:</span><span className="col-span-2 font-semibold">{planName}<br/><span className="font-normal text-gray-600">{planDescription}</span></span></div>
+                <div className="grid grid-cols-3 text-sm py-2"><span className="font-medium">Plan:</span><span className="col-span-2 font-semibold">{planName}<br/><span className="font-normal text-gray-600">{planDescription}</span></span></div>
               </div>
             </div>
           )}
 
-          <div className="border-l-4 border-orange-500 mb-6">
+          <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
             <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Contract Terms</h2>
             <div className="px-4 py-3 space-y-2">
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Start Date:</span><span className="col-span-2">{formatDate(startDate)}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Initial Contract Term:</span><span className="col-span-2">{initialTerm}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Renewal Contract Term:</span><span className="col-span-2">{renewalTerm}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Payment Terms:</span><span className="col-span-2">{paymentTerms}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Billing Frequency:</span><span className="col-span-2">{billingFrequency}</span></div>
+              <div className="grid grid-cols-3 text-sm border-b border-gray-200 py-2"><span className="font-medium">Start Date:</span><span className="col-span-2">{formatDate(startDate)}</span></div>
+              <div className="grid grid-cols-3 text-sm border-b border-gray-200 py-2"><span className="font-medium">Initial Contract Term:</span><span className="col-span-2">{initialTerm}</span></div>
+              <div className="grid grid-cols-3 text-sm border-b border-gray-200 py-2"><span className="font-medium">Renewal Contract Term:</span><span className="col-span-2">{renewalTerm}</span></div>
+              <div className="grid grid-cols-3 text-sm border-b border-gray-200 py-2"><span className="font-medium">Payment Terms:</span><span className="col-span-2">{paymentTerms}</span></div>
+              <div className="grid grid-cols-3 text-sm py-2"><span className="font-medium">Billing Frequency:</span><span className="col-span-2">{billingFrequency}</span></div>
             </div>
           </div>
 
           {enabledProducts.length > 0 && (
-            <div className="border-l-4 border-orange-500 mb-6">
+            <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
               <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Product Fees</h2>
               <div className="px-4 py-3">
                 {enabledProducts.map(p => (
-                  <div key={p.id} className="grid grid-cols-3 text-sm py-2 border-b border-gray-100">
+                  <div key={p.id} className="grid grid-cols-3 text-sm py-2 border-b border-gray-200">
                     <span className="font-medium">{p.name}:</span>
                     <span className="col-span-2">
                       {p.discount ? (
@@ -620,11 +620,11 @@ export default function App() {
           )}
 
           {enabledIntegrations.length > 0 && (
-            <div className="border-l-4 border-orange-500 mb-6">
+            <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
               <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Integrations</h2>
               <div className="px-4 py-3">
                 {enabledIntegrations.map(p => (
-                  <div key={p.id} className="grid grid-cols-3 text-sm py-2 border-b border-gray-100">
+                  <div key={p.id} className="grid grid-cols-3 text-sm py-2 border-b border-gray-200">
                     <span className="font-medium">{p.name}:</span>
                     <span className="col-span-2">
                       {p.discount ? (
@@ -638,11 +638,11 @@ export default function App() {
           )}
 
           {enabledFees.length > 0 && (
-            <div className="border-l-4 border-orange-500 mb-6">
+            <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
               <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Additional Fees</h2>
               <div className="px-4 py-3">
                 {enabledFees.map(p => (
-                  <div key={p.id} className="grid grid-cols-3 text-sm py-2 border-b border-gray-100">
+                  <div key={p.id} className="grid grid-cols-3 text-sm py-2 border-b border-gray-200">
                     <span className="font-medium">{p.name}:</span>
                     <span className="col-span-2">
                       {p.discount ? (
@@ -656,11 +656,11 @@ export default function App() {
           )}
 
           {activeTiers.length > 0 && (
-            <div className="border-l-4 border-orange-500 mb-6">
+            <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
               <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Minimum Usage</h2>
               <div className="px-4 py-3">
                 {activeTiers.map(t => (
-                  <div key={t.id} className="grid grid-cols-3 text-sm py-2 border-b border-gray-100">
+                  <div key={t.id} className="grid grid-cols-3 text-sm py-2 border-b border-gray-200">
                     <span className="font-medium">{getTierLabel(t)}:</span>
                     <span className="font-semibold">{formatCurrency(t.amount)}/mo</span>
                     <span className="text-gray-500">{t.note && `(${t.note})`}</span>
@@ -693,10 +693,111 @@ export default function App() {
             </div>
           </div>
 
-          <div className="mt-8 flex justify-center print:hidden">
+          <div className="mt-8 flex justify-center gap-4 print:hidden">
             <button type="button" onClick={() => window.print()} className="px-6 py-2 bg-gray-800 text-white rounded hover:bg-gray-900">
               Print / Save as PDF
             </button>
+          </div>
+
+          {/* Exhibit 1: Description of Services */}
+          <div className="mt-16 pt-8 border-t-2 border-gray-200">
+            <h1 className="text-2xl font-light text-center text-gray-800 mb-8">Exhibit 1: Description of Services</h1>
+            
+            {enabledProducts.some(p => p.id === 'buy') && (
+              <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
+                <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Buy Capabilities</h2>
+                <div className="px-4 py-3">
+                  <div className="grid grid-cols-4 text-sm py-3 border-b border-gray-200">
+                    <span className="font-medium">Shop:</span>
+                    <span className="col-span-3">Folio allows users to browse and compare products from a curated set of approved suppliers, and then add to a unified Folio cart.</span>
+                  </div>
+                  <div className="grid grid-cols-4 text-sm py-3 border-b border-gray-200">
+                    <span className="font-medium">Approve:</span>
+                    <span className="col-span-3">Folio supports a streamlined approval workflow based on a set of predetermined rules. If applicable to an order, Approvers receive notice by email before orders submitted by Folio.</span>
+                  </div>
+                  <div className="grid grid-cols-4 text-sm py-3 border-b border-gray-200">
+                    <span className="font-medium">Budget:</span>
+                    <span className="col-span-3">Folio supports budget import and checkbook visibility at checkout.</span>
+                  </div>
+                  <div className="grid grid-cols-4 text-sm py-3">
+                    <span className="font-medium">Order:</span>
+                    <span className="col-span-3">Folio places an order with Supplier or sends PO to supplier for goods purchased on the platform. When available, Buyers can access order status from approval to delivery, and use Folio to record order receipt.</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {enabledProducts.some(p => p.id === 'bills') && (
+              <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
+                <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Bills Capabilities</h2>
+                <div className="px-4 py-3">
+                  <div className="grid grid-cols-4 text-sm py-3 border-b border-gray-200">
+                    <span className="font-medium">Transcribe:</span>
+                    <span className="col-span-3">Folio digitizes invoices forwarded to bills@folio.co and maps them to the correct Folio Store</span>
+                  </div>
+                  <div className="grid grid-cols-4 text-sm py-3 border-b border-gray-200">
+                    <span className="font-medium">Match:</span>
+                    <span className="col-span-3">Folio compares the invoices to Orders placed on platform, if applicable; Folio assigns status such as Matched if Match is found; Match is considered auto-approved; Folio also assigns status as Approved or Needs Review</span>
+                  </div>
+                  <div className="grid grid-cols-4 text-sm py-3 border-b border-gray-200">
+                    <span className="font-medium">Review:</span>
+                    <span className="col-span-3">Payers can expediently process invoices, and triage exceptions using Folio</span>
+                  </div>
+                  <div className="grid grid-cols-4 text-sm py-3">
+                    <span className="font-medium">Transmit:</span>
+                    <span className="col-span-3">Payers can expediently process invoices, and triage exceptions using Folio; Folio can transmit the invoices to HIA in real-time</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {enabledProducts.some(p => p.id === 'inventory') && (
+              <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
+                <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Inventory Capabilities</h2>
+                <div className="px-4 py-3">
+                  <div className="grid grid-cols-4 text-sm py-3 border-b border-gray-200">
+                    <span className="font-medium">Count:</span>
+                    <span className="col-span-3">Folio enables users to conduct inventory counts with customizable count sheets and mobile-friendly interfaces.</span>
+                  </div>
+                  <div className="grid grid-cols-4 text-sm py-3 border-b border-gray-200">
+                    <span className="font-medium">Track:</span>
+                    <span className="col-span-3">Folio tracks inventory levels, usage patterns, and provides visibility into stock across locations.</span>
+                  </div>
+                  <div className="grid grid-cols-4 text-sm py-3">
+                    <span className="font-medium">Report:</span>
+                    <span className="col-span-3">Folio generates inventory reports including valuation, variance analysis, and usage trends.</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {enabledProducts.some(p => p.id === 'pay') && (
+              <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
+                <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Pay Capabilities</h2>
+                <div className="px-4 py-3">
+                  <div className="grid grid-cols-4 text-sm py-3 border-b border-gray-200">
+                    <span className="font-medium">Balance:</span>
+                    <span className="col-span-3">Payers can fund an account with Patriot Bank, N.A. and access current balances</span>
+                  </div>
+                  <div className="grid grid-cols-4 text-sm py-3 border-b border-gray-200">
+                    <span className="font-medium">Disburse:</span>
+                    <span className="col-span-3">Payers can use Folio to issue payment via ACH, check, or Folio Commercial Prepaid Mastercard, depending on the supplier. The Folio Commercial Prepaid Mastercard is issued by Patriot Bank, N.A., Member FDIC, pursuant to a license from Mastercard International.</span>
+                  </div>
+                  <div className="grid grid-cols-4 text-sm py-3">
+                    <span className="font-medium">Earn:</span>
+                    <span className="col-span-3">Customer can earn rewards back on select supplier payments; Rewards accrue per Folio Commercial Prepaid Mastercard® payment and, if eligible for rewards, are paid out to funding account monthly</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Exhibit 2: Master Terms */}
+          <div className="mt-16 pt-8 border-t-2 border-gray-200">
+            <h1 className="text-2xl font-light text-center text-gray-800 mb-8">Exhibit 2: Master Terms</h1>
+            <p className="text-sm text-gray-600 text-center">
+              Folio's Master Terms can be found at <a href="https://folio.co/terms" className="text-orange-600 underline">https://folio.co/terms</a>.
+            </p>
           </div>
         </div>
       </div>
