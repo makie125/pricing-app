@@ -2,20 +2,25 @@ import React, { useState } from 'react';
 
 const FolioLogo = () => (
   <div className="flex items-center gap-2">
-    <div className="grid grid-cols-2 gap-0.5">
-      <div className="w-3 h-3 bg-orange-500 rounded-sm"></div>
-      <div className="w-3 h-3 bg-orange-500 rounded-sm"></div>
-      <div className="w-3 h-3 bg-orange-500 rounded-sm"></div>
-      <div className="w-3 h-3 bg-orange-500 rounded-sm"></div>
+    <div className="grid grid-cols-3 gap-0.5">
+      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
+      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
+      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
+      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
+      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
+      <div className="w-2.5 h-2.5 border-2 border-orange-500 rounded-sm"></div>
+      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
+      <div className="w-2.5 h-2.5 border-2 border-orange-500 rounded-sm"></div>
+      <div className="w-2.5 h-2.5 border-2 border-orange-500 rounded-sm"></div>
     </div>
-    <span className="text-xl font-bold text-orange-500">FOLIO</span>
+    <span className="text-xl font-bold text-orange-500 tracking-wide" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>FOLIO</span>
   </div>
 );
 
 const InputSection = ({ title, children }) => (
   <div className="mb-6">
     <h3 className="text-sm font-semibold text-orange-600 mb-3 uppercase tracking-wide">{title}</h3>
-    <div className="bg-white rounded-lg border border-gray-200 p-4">{children}</div>
+    <div className="bg-white rounded-lg border border-gray-300 p-4 shadow-sm">{children}</div>
   </div>
 );
 
@@ -557,22 +562,22 @@ export default function App() {
             Quote date: {formatDate(quoteDate)} | <span className="underline">Quote expiry:</span> {formatDate(expiryDate)}
           </p>
 
-          <div className="border-l-4 border-orange-500 mb-6">
+          <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
             <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Customer Information</h2>
             <div className="px-4 py-3 space-y-2">
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Customer:</span><span className="col-span-2">{customerName}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Address:</span><span className="col-span-2">{customerAddress}<br/>{customerAddressLine2}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Contact name:</span><span className="col-span-2">{customerContact}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Contact email:</span><span className="col-span-2">{customerEmail}</span></div>
+              <div className="grid grid-cols-3 text-sm border-b border-gray-200 py-2"><span className="font-medium">Customer:</span><span className="col-span-2">{customerName}</span></div>
+              <div className="grid grid-cols-3 text-sm border-b border-gray-200 py-2"><span className="font-medium">Address:</span><span className="col-span-2">{customerAddress}<br/>{customerAddressLine2}</span></div>
+              <div className="grid grid-cols-3 text-sm border-b border-gray-200 py-2"><span className="font-medium">Contact name:</span><span className="col-span-2">{customerContact}</span></div>
+              <div className="grid grid-cols-3 text-sm py-2"><span className="font-medium">Contact email:</span><span className="col-span-2">{customerEmail}</span></div>
             </div>
           </div>
 
-          <div className="border-l-4 border-orange-500 mb-6">
+          <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
             <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Billing Contact Information</h2>
             <div className="px-4 py-3 space-y-2">
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Bill To:</span><span className="col-span-2">{billingBillTo}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Billing Address:</span><span className="col-span-2">{billingAddress}<br/>{billingAddressLine2}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Invoice Email:</span><span className="col-span-2">{billingEmail}</span></div>
+              <div className="grid grid-cols-3 text-sm border-b border-gray-200 py-2"><span className="font-medium">Bill To:</span><span className="col-span-2">{billingBillTo}</span></div>
+              <div className="grid grid-cols-3 text-sm border-b border-gray-200 py-2"><span className="font-medium">Billing Address:</span><span className="col-span-2">{billingAddress}<br/>{billingAddressLine2}</span></div>
+              <div className="grid grid-cols-3 text-sm py-2"><span className="font-medium">Invoice Email:</span><span className="col-span-2">{billingEmail}</span></div>
             </div>
           </div>
 
