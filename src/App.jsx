@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const FolioLogo = () => (
   <div className="flex items-center gap-2">
@@ -151,36 +151,151 @@ const initialMinimumUsage = [
 ];
 
 export default function App() {
-  const [view, setView] = useState('input');
-  const [customerName, setCustomerName] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
-  const [customerAddressLine2, setCustomerAddressLine2] = useState('');
-  const [customerContact, setCustomerContact] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
+  // Check URL for view state
+  const getInitialView = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('view') === 'preview' ? 'preview' : 'input';
+  };
+
+  // Load saved data from localStorage
+  const loadSavedData = (key, defaultValue) => {
+    try {
+      const saved = localStorage.getItem(`folio_${key}`);
+      return saved ? JSON.parse(saved) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  };
+
+  const [view, setView] = useState(getInitialView);
+  const [customerName, setCustomerName] = useState(() => loadSavedData('customerName', ''));
+  const [customerAddress, setCustomerAddress] = useState(() => loadSavedData('customerAddress', ''));
+  const [customerAddressLine2, setCustomerAddressLine2] = useState(() => loadSavedData('customerAddressLine2', ''));
+  const [customerContact, setCustomerContact] = useState(() => loadSavedData('customerContact', ''));
+  const [customerEmail, setCustomerEmail] = useState(() => loadSavedData('customerEmail', ''));
   
-  const [billingSame, setBillingSame] = useState(false);
-  const [billingBillTo, setBillingBillTo] = useState('');
-  const [billingAddress, setBillingAddress] = useState('');
-  const [billingAddressLine2, setBillingAddressLine2] = useState('');
-  const [billingEmail, setBillingEmail] = useState('');
+  const [billingSame, setBillingSame] = useState(() => loadSavedData('billingSame', false));
+  const [billingBillTo, setBillingBillTo] = useState(() => loadSavedData('billingBillTo', ''));
+  const [billingAddress, setBillingAddress] = useState(() => loadSavedData('billingAddress', ''));
+  const [billingAddressLine2, setBillingAddressLine2] = useState(() => loadSavedData('billingAddressLine2', ''));
+  const [billingEmail, setBillingEmail] = useState(() => loadSavedData('billingEmail', ''));
   
-  const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
-  const [expiryDate, setExpiryDate] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [initialTerm, setInitialTerm] = useState('12 months');
-  const [renewalTerm, setRenewalTerm] = useState('1 year');
-  const [paymentTerms, setPaymentTerms] = useState('Net 30');
-  const [billingFrequency, setBillingFrequency] = useState('Monthly');
+  const [quoteDate, setQuoteDate] = useState(() => loadSavedData('quoteDate', new Date().toISOString().split('T')[0]));
+  const [expiryDate, setExpiryDate] = useState(() => loadSavedData('expiryDate', ''));
+  const [startDate, setStartDate] = useState(() => loadSavedData('startDate', ''));
+  const [initialTerm, setInitialTerm] = useState(() => loadSavedData('initialTerm', '12 months'));
+  const [renewalTerm, setRenewalTerm] = useState(() => loadSavedData('renewalTerm', '1 year'));
+  const [paymentTerms, setPaymentTerms] = useState(() => loadSavedData('paymentTerms', 'Net 30'));
+  const [billingFrequency, setBillingFrequency] = useState(() => loadSavedData('billingFrequency', 'Monthly'));
   
-  const [planName, setPlanName] = useState('');
-  const [planDescription, setPlanDescription] = useState('');
+  const [planName, setPlanName] = useState(() => loadSavedData('planName', ''));
+  const [planDescription, setPlanDescription] = useState(() => loadSavedData('planDescription', ''));
   
-  const [products, setProducts] = useState(initialProducts);
-  const [integrations, setIntegrations] = useState(initialIntegrations);
-  const [additionalFees, setAdditionalFees] = useState(initialAdditionalFees);
-  const [customIntegrations, setCustomIntegrations] = useState([]);
-  const [customFees, setCustomFees] = useState([]);
-  const [minimumUsage, setMinimumUsage] = useState(initialMinimumUsage);
+  const [products, setProducts] = useState(() => loadSavedData('products', initialProducts));
+  const [integrations, setIntegrations] = useState(() => loadSavedData('integrations', initialIntegrations));
+  const [additionalFees, setAdditionalFees] = useState(() => loadSavedData('additionalFees', initialAdditionalFees));
+  const [customIntegrations, setCustomIntegrations] = useState(() => loadSavedData('customIntegrations', []));
+  const [customFees, setCustomFees] = useState(() => loadSavedData('customFees', []));
+  const [minimumUsage, setMinimumUsage] = useState(() => loadSavedData('minimumUsage', initialMinimumUsage));
+
+  // Save to localStorage whenever values change
+  useEffect(() => {
+    const saveData = (key, value) => {
+      try {
+        localStorage.setItem(`folio_${key}`, JSON.stringify(value));
+      } catch (e) {
+        console.warn('Could not save to localStorage:', e);
+      }
+    };
+
+    saveData('customerName', customerName);
+    saveData('customerAddress', customerAddress);
+    saveData('customerAddressLine2', customerAddressLine2);
+    saveData('customerContact', customerContact);
+    saveData('customerEmail', customerEmail);
+    saveData('billingSame', billingSame);
+    saveData('billingBillTo', billingBillTo);
+    saveData('billingAddress', billingAddress);
+    saveData('billingAddressLine2', billingAddressLine2);
+    saveData('billingEmail', billingEmail);
+    saveData('quoteDate', quoteDate);
+    saveData('expiryDate', expiryDate);
+    saveData('startDate', startDate);
+    saveData('initialTerm', initialTerm);
+    saveData('renewalTerm', renewalTerm);
+    saveData('paymentTerms', paymentTerms);
+    saveData('billingFrequency', billingFrequency);
+    saveData('planName', planName);
+    saveData('planDescription', planDescription);
+    saveData('products', products);
+    saveData('integrations', integrations);
+    saveData('additionalFees', additionalFees);
+    saveData('customIntegrations', customIntegrations);
+    saveData('customFees', customFees);
+    saveData('minimumUsage', minimumUsage);
+  }, [customerName, customerAddress, customerAddressLine2, customerContact, customerEmail,
+      billingSame, billingBillTo, billingAddress, billingAddressLine2, billingEmail,
+      quoteDate, expiryDate, startDate, initialTerm, renewalTerm, paymentTerms, billingFrequency,
+      planName, planDescription, products, integrations, additionalFees, customIntegrations, customFees, minimumUsage]);
+
+  // Update URL when view changes
+  const changeView = (newView) => {
+    setView(newView);
+    const url = new URL(window.location);
+    if (newView === 'preview') {
+      url.searchParams.set('view', 'preview');
+    } else {
+      url.searchParams.delete('view');
+    }
+    window.history.pushState({}, '', url);
+  };
+
+  // Handle browser back/forward
+  useEffect(() => {
+    const handlePopState = () => {
+      setView(getInitialView());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const clearAllData = () => {
+    if (window.confirm('Are you sure you want to clear all form data? This cannot be undone.')) {
+      // Clear localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('folio_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Reset all state
+      setCustomerName('');
+      setCustomerAddress('');
+      setCustomerAddressLine2('');
+      setCustomerContact('');
+      setCustomerEmail('');
+      setBillingSame(false);
+      setBillingBillTo('');
+      setBillingAddress('');
+      setBillingAddressLine2('');
+      setBillingEmail('');
+      setQuoteDate(new Date().toISOString().split('T')[0]);
+      setExpiryDate('');
+      setStartDate('');
+      setInitialTerm('12 months');
+      setRenewalTerm('1 year');
+      setPaymentTerms('Net 30');
+      setBillingFrequency('Monthly');
+      setPlanName('');
+      setPlanDescription('');
+      setProducts(initialProducts);
+      setIntegrations(initialIntegrations);
+      setAdditionalFees(initialAdditionalFees);
+      setCustomIntegrations([]);
+      setCustomFees([]);
+      setMinimumUsage(initialMinimumUsage);
+    }
+  };
 
   const handleBillingSameAsCustomer = (checked) => {
     setBillingSame(checked);
@@ -206,7 +321,13 @@ export default function App() {
     <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between mb-6">
         <FolioLogo />
-        <h1 className="text-xl font-semibold text-gray-800">Order Form Generator</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-xl font-semibold text-gray-800">Order Form Generator</h1>
+          <button type="button" onClick={clearAllData}
+            className="px-3 py-1 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50">
+            Clear All
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
@@ -525,7 +646,7 @@ export default function App() {
       </InputSection>
 
       <div className="flex justify-center mt-8">
-        <button type="button" onClick={() => setView('preview')}
+        <button type="button" onClick={() => changeView('preview')}
           className="px-8 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors shadow-lg">
           Generate Order Form
         </button>
@@ -542,7 +663,7 @@ export default function App() {
     return (
       <div className="bg-white min-h-screen">
         <div className="max-w-4xl mx-auto p-8">
-          <button type="button" onClick={() => setView('input')} className="mb-4 text-sm text-orange-600 hover:text-orange-700 font-medium print:hidden">
+          <button type="button" onClick={() => changeView('input')} className="mb-4 text-sm text-orange-600 hover:text-orange-700 font-medium print:hidden">
             ← Back to Editor
           </button>
 
