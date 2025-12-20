@@ -1,38 +1,48 @@
-import React, { useState, useEffect } from 'react';
+<div className="mt-8 flex justify-center gap-4 print:hidden">
+            <button type="button" onClick={() => window.print()} className="px-8 py-3 bg-gradient-to-r from-gray-700 to-gray-800 text-import React, { useState, useEffect } from 'react';
 
-const FolioLogo = () => (
-  <div className="flex items-center gap-2">
-    <div className="grid grid-cols-3 gap-0.5">
-      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
-      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
-      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
-      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
-      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
-      <div className="w-2.5 h-2.5 border-2 border-orange-500 rounded-sm"></div>
-      <div className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></div>
-      <div className="w-2.5 h-2.5 border-2 border-orange-500 rounded-sm"></div>
-      <div className="w-2.5 h-2.5 border-2 border-orange-500 rounded-sm"></div>
+const FolioLogo = ({ size = 'default' }) => {
+  const boxSize = size === 'large' ? 'w-4 h-4' : 'w-2.5 h-2.5';
+  const textSize = size === 'large' ? 'text-2xl' : 'text-xl';
+  const gap = size === 'large' ? 'gap-1' : 'gap-0.5';
+  
+  return (
+    <div className="flex items-center gap-3">
+      <div className={`grid grid-cols-3 ${gap}`}>
+        <div className={`${boxSize} bg-orange-500 rounded-sm`}></div>
+        <div className={`${boxSize} bg-orange-500 rounded-sm`}></div>
+        <div className={`${boxSize} bg-orange-500 rounded-sm`}></div>
+        <div className={`${boxSize} bg-orange-500 rounded-sm`}></div>
+        <div className={`${boxSize} bg-orange-500 rounded-sm`}></div>
+        <div className={`${boxSize} border-2 border-orange-500 rounded-sm`}></div>
+        <div className={`${boxSize} bg-orange-500 rounded-sm`}></div>
+        <div className={`${boxSize} border-2 border-orange-500 rounded-sm`}></div>
+        <div className={`${boxSize} border-2 border-orange-500 rounded-sm`}></div>
+      </div>
+      <span className={`${textSize} font-bold text-orange-500 tracking-wide`} style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>FOLIO</span>
     </div>
-    <span className="text-xl font-bold text-orange-500 tracking-wide" style={{fontFamily: 'system-ui, -apple-system, sans-serif'}}>FOLIO</span>
-  </div>
-);
+  );
+};
 
-const InputSection = ({ title, children }) => (
+const InputSection = ({ title, children, icon }) => (
   <div className="mb-6">
-    <h3 className="text-sm font-semibold text-orange-600 mb-3 uppercase tracking-wide">{title}</h3>
-    <div className="bg-white rounded-lg border border-gray-300 p-4 shadow-sm">{children}</div>
+    <div className="flex items-center gap-2 mb-3">
+      {icon && <span className="text-orange-500">{icon}</span>}
+      <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">{title}</h3>
+    </div>
+    <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow duration-200">{children}</div>
   </div>
 );
 
 const TextField = ({ label, value, onChange, placeholder }) => (
-  <div className="mb-3">
-    <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+  <div className="mb-4">
+    <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">{label}</label>
     <input 
       type="text" 
       value={value} 
       onChange={e => onChange(e.target.value)} 
       placeholder={placeholder}
-      className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500" 
+      className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white" 
     />
   </div>
 );
@@ -74,13 +84,15 @@ const DatePicker = ({ label, value, onChange }) => {
     const daysInMonth = getDaysInMonth(viewYear, viewMonth);
     const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
     const days = [];
-    for (let i = 0; i < firstDay; i++) days.push(<div key={`empty-${i}`} className="w-8 h-8"></div>);
+    for (let i = 0; i < firstDay; i++) days.push(<div key={`empty-${i}`} className="w-9 h-9"></div>);
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const isSelected = value === dateStr;
+      const isToday = dateStr === new Date().toISOString().split('T')[0];
       days.push(
         <button key={day} type="button" onClick={() => handleSelectDate(day)}
-          className={`w-8 h-8 text-sm rounded hover:bg-orange-100 ${isSelected ? 'bg-orange-500 text-white hover:bg-orange-600' : ''}`}>
+          className={`w-9 h-9 text-sm rounded-lg transition-all duration-150 
+            ${isSelected ? 'bg-orange-500 text-white shadow-md' : isToday ? 'bg-orange-100 text-orange-600 font-medium' : 'hover:bg-gray-100'}`}>
           {day}
         </button>
       );
@@ -89,25 +101,31 @@ const DatePicker = ({ label, value, onChange }) => {
   };
   
   return (
-    <div className="mb-3 relative">
-      <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+    <div className="mb-4 relative">
+      <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">{label}</label>
       <div className="relative">
         <input type="text" value={value ? formatDateDisplay(value) : ''} readOnly onClick={() => setIsOpen(!isOpen)} placeholder="Select date"
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer" />
+          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer transition-all duration-200 bg-gray-50 hover:bg-white" />
+        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
         {isOpen && (
-          <div className="absolute z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-2">
-              <button type="button" onClick={handlePrevMonth} className="p-1 hover:bg-gray-100 rounded text-gray-600">&lt;</button>
-              <span className="text-sm font-medium">{months[viewMonth]} {viewYear}</span>
-              <button type="button" onClick={handleNextMonth} className="p-1 hover:bg-gray-100 rounded text-gray-600">&gt;</button>
+          <div className="absolute z-50 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-72" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <button type="button" onClick={handlePrevMonth} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              </button>
+              <span className="text-sm font-semibold text-gray-800">{months[viewMonth]} {viewYear}</span>
+              <button type="button" onClick={handleNextMonth} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              </button>
             </div>
-            <div className="grid grid-cols-7 gap-1 mb-1">
+            <div className="grid grid-cols-7 gap-1 mb-2">
               {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-                <div key={d} className="w-8 h-6 text-xs text-gray-500 flex items-center justify-center">{d}</div>
+                <div key={d} className="w-9 h-8 text-xs text-gray-400 font-medium flex items-center justify-center">{d}</div>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-1">{renderCalendar()}</div>
-            <button type="button" onClick={() => setIsOpen(false)} className="mt-2 w-full text-xs text-gray-500 hover:text-gray-700">Close</button>
           </div>
         )}
       </div>
@@ -402,135 +420,166 @@ export default function App() {
   };
 
   const renderInputForm = () => (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between mb-4">
-        <FolioLogo />
-        <h1 className="text-xl font-semibold text-gray-800">Order Form Generator</h1>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="flex border-b border-gray-300 mb-6">
-        <button
-          type="button"
-          onClick={() => setActiveTab('form')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
-            activeTab === 'form'
-              ? 'border-orange-500 text-orange-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Order Form
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('templates')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
-            activeTab === 'templates'
-              ? 'border-orange-500 text-orange-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Template Library {templates.length > 0 && `(${templates.length})`}
-        </button>
-      </div>
-
-      {activeTab === 'templates' ? (
-        // Template Library Tab
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Saved Templates</h2>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+        <div className="max-w-5xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <FolioLogo size="large" />
+            <h1 className="text-lg font-semibold text-gray-600">Order Form Generator</h1>
           </div>
-          
-          {templates.length === 0 ? (
-            <div className="bg-white rounded-lg border border-gray-300 p-8 text-center">
-              <p className="text-gray-500 mb-4">No templates saved yet.</p>
-              <p className="text-sm text-gray-400">Create a template by filling out the order form and clicking "Save as Template".</p>
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {templates.map(template => (
-                <div key={template.id} className="bg-white rounded-lg border border-gray-300 p-4 shadow-sm">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800">{template.name}</h3>
-                      <p className="text-xs text-gray-500 mt-1">Created {new Date(template.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                      
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {template.data.products.filter(p => p.enabled).map(p => (
-                          <span key={p.id} className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded">{p.name}</span>
-                        ))}
-                        {template.data.integrations.filter(p => p.enabled).map(p => (
-                          <span key={p.id} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">{p.name}</span>
-                        ))}
-                        {template.data.customIntegrations.filter(p => p.name).map(p => (
-                          <span key={p.id} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">{p.name}</span>
-                        ))}
-                      </div>
-                      
-                      <div className="mt-2 text-xs text-gray-500">
-                        <span>{template.data.planName || 'No plan name'}</span>
-                        {template.data.planDescription && <span> • {template.data.planDescription}</span>}
-                        <span> • {template.data.initialTerm} initial</span>
-                        <span> • {template.data.paymentTerms}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2 ml-4">
-                      <button type="button" onClick={() => loadTemplate(template)}
-                        className="px-3 py-1.5 text-sm text-white bg-orange-500 rounded hover:bg-orange-600">
-                        Use Template
-                      </button>
-                      <button type="button" onClick={() => deleteTemplate(template.id)}
-                        className="px-3 py-1.5 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50">
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
-      ) : (
-        // Order Form Tab
-        <>
-          <div className="flex items-center justify-end gap-3 mb-4">
-            <button type="button" onClick={() => setShowTemplateModal(true)}
-              className="px-3 py-1 text-sm text-blue-600 border border-blue-300 rounded hover:bg-blue-50">
-              Save as Template
-            </button>
-            <button type="button" onClick={clearAllData}
-              className="px-3 py-1 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50">
-              Clear All
-            </button>
-          </div>
+      </div>
 
-          {/* Save Template Modal */}
-          {showTemplateModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
-                <h2 className="text-lg font-semibold mb-4">Save as Template</h2>
-                <p className="text-sm text-gray-600 mb-4">This will save your current pricing, products, and terms. Customer information will not be saved.</p>
-                <input
-                  type="text"
-                  value={newTemplateName}
-                  onChange={e => setNewTemplateName(e.target.value)}
-                  placeholder="Template name (e.g., Pilot Package)"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded mb-4 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                />
-                <div className="flex justify-end gap-2">
-                  <button type="button" onClick={() => { setShowTemplateModal(false); setNewTemplateName(''); }}
-                    className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50">
-                    Cancel
-                  </button>
-                  <button type="button" onClick={saveAsTemplate}
-                    className="px-4 py-2 text-sm text-white bg-orange-500 rounded hover:bg-orange-600">
-                    Save Template
-                  </button>
-                </div>
+      <div className="max-w-5xl mx-auto px-6 py-6">
+        {/* Tab Navigation */}
+        <div className="flex gap-1 p-1 bg-gray-200 rounded-xl mb-6 w-fit">
+          <button
+            type="button"
+            onClick={() => setActiveTab('form')}
+            className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+              activeTab === 'form'
+                ? 'bg-white text-gray-800 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Order Form
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('templates')}
+            className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 ${
+              activeTab === 'templates'
+                ? 'bg-white text-gray-800 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Templates
+            {templates.length > 0 && (
+              <span className="px-2 py-0.5 text-xs bg-orange-100 text-orange-600 rounded-full">{templates.length}</span>
+            )}
+          </button>
+        </div>
+
+        {activeTab === 'templates' ? (
+          // Template Library Tab
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">Template Library</h2>
+                <p className="text-gray-500 text-sm mt-1">Save and reuse your pricing configurations</p>
               </div>
             </div>
-          )}
+            
+            {templates.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">No templates yet</h3>
+                <p className="text-gray-500 mb-4">Create a template by filling out the order form and clicking "Save as Template".</p>
+                <button type="button" onClick={() => setActiveTab('form')} className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+                  Create Your First Template
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {templates.map(template => (
+                  <div key={template.id} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-lg font-semibold text-gray-800">{template.name}</h3>
+                          {template.data.planName && (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">{template.data.planName}</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-400 mt-1">Created {new Date(template.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {template.data.products.filter(p => p.enabled).map(p => (
+                            <span key={p.id} className="px-3 py-1.5 bg-orange-50 text-orange-700 text-xs font-medium rounded-full">{p.name}</span>
+                          ))}
+                          {template.data.integrations.filter(p => p.enabled).map(p => (
+                            <span key={p.id} className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">{p.name}</span>
+                          ))}
+                          {template.data.customIntegrations.filter(p => p.name).map(p => (
+                            <span key={p.id} className="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-medium rounded-full">{p.name}</span>
+                          ))}
+                        </div>
+                        
+                        <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            {template.data.initialTerm}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            {template.data.paymentTerms}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2 ml-6">
+                        <button type="button" onClick={() => loadTemplate(template)}
+                          className="px-5 py-2.5 text-sm font-medium text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-colors shadow-sm hover:shadow">
+                          Use Template
+                        </button>
+                        <button type="button" onClick={() => deleteTemplate(template.id)}
+                          className="px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          // Order Form Tab
+          <>
+            <div className="flex items-center justify-end gap-3 mb-6">
+              <button type="button" onClick={() => setShowTemplateModal(true)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center gap-2 shadow-sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                Save as Template
+              </button>
+              <button type="button" onClick={clearAllData}
+                className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 hover:border-red-300 transition-all duration-200 flex items-center gap-2 shadow-sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                Clear All
+              </button>
+            </div>
+
+            {/* Save Template Modal */}
+            {showTemplateModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+                <div className="bg-white rounded-2xl p-6 w-[420px] shadow-2xl">
+                  <h2 className="text-xl font-bold text-gray-800 mb-2">Save as Template</h2>
+                  <p className="text-sm text-gray-500 mb-5">Save your current pricing, products, and terms for reuse. Customer information will not be saved.</p>
+                  <input
+                    type="text"
+                    value={newTemplateName}
+                    onChange={e => setNewTemplateName(e.target.value)}
+                    placeholder="Template name (e.g., Pilot Package)"
+                    className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl mb-5 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
+                  />
+                  <div className="flex justify-end gap-3">
+                    <button type="button" onClick={() => { setShowTemplateModal(false); setNewTemplateName(''); }}
+                      className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
+                      Cancel
+                    </button>
+                    <button type="button" onClick={saveAsTemplate}
+                      className="px-5 py-2.5 text-sm font-medium text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-colors shadow-sm">
+                      Save Template
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
       <div className="grid grid-cols-2 gap-6">
         <InputSection title="Customer Information">
@@ -542,9 +591,9 @@ export default function App() {
         </InputSection>
 
         <InputSection title="Billing Information">
-          <label className="flex items-center gap-2 mb-3 text-sm">
-            <input type="checkbox" checked={billingSame} onChange={e => handleBillingSameAsCustomer(e.target.checked)} className="w-4 h-4 text-orange-500 rounded" />
-            Same as customer
+          <label className="flex items-center gap-3 mb-4 text-sm cursor-pointer group">
+            <input type="checkbox" checked={billingSame} onChange={e => handleBillingSameAsCustomer(e.target.checked)} className="w-5 h-5 text-orange-500 rounded-md border-gray-300 focus:ring-orange-500 cursor-pointer" />
+            <span className="text-gray-600 group-hover:text-gray-800 transition-colors">Same as customer information</span>
           </label>
           <TextField label="Bill To" value={billingBillTo} onChange={setBillingBillTo} placeholder="Billing contact" />
           <TextField label="Billing Address" value={billingAddress} onChange={setBillingAddress} placeholder="Street address" />
@@ -566,17 +615,17 @@ export default function App() {
             <TextField label="Renewal Term" value={renewalTerm} onChange={setRenewalTerm} placeholder="1 year" />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="mb-3">
-              <label className="block text-xs font-medium text-gray-600 mb-1">Payment Terms</label>
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Payment Terms</label>
               <select value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500">
+                className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50 hover:bg-white transition-all cursor-pointer">
                 <option>Net 15</option><option>Net 30</option><option>Net 45</option><option>Net 60</option>
               </select>
             </div>
-            <div className="mb-3">
-              <label className="block text-xs font-medium text-gray-600 mb-1">Billing Frequency</label>
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Billing Frequency</label>
               <select value={billingFrequency} onChange={e => setBillingFrequency(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500">
+                className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50 hover:bg-white transition-all cursor-pointer">
                 <option>Monthly</option><option>Quarterly</option><option>Annually</option>
               </select>
             </div>
@@ -592,7 +641,7 @@ export default function App() {
       </InputSection>
 
       <InputSection title="Product Fees">
-        <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 uppercase mb-2 pb-2 border-b">
+        <div className="grid grid-cols-12 gap-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 pb-3 border-b border-gray-200">
           <div className="col-span-1"></div>
           <div className="col-span-3">Product</div>
           <div className="col-span-3">Price</div>
@@ -601,31 +650,31 @@ export default function App() {
           <div className="col-span-1"></div>
         </div>
         {products.map(item => (
-          <div key={item.id} className={`grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100 ${!item.enabled ? 'opacity-50' : ''}`}>
+          <div className={`grid grid-cols-12 gap-3 items-center py-3 border-b border-gray-100 transition-opacity ${!item.enabled ? 'opacity-40' : ''}`}>
             <div className="col-span-1">
               <input type="checkbox" checked={item.enabled} 
                 onChange={e => setProducts(prev => prev.map(p => p.id === item.id ? {...p, enabled: e.target.checked} : p))}
-                className="w-4 h-4 text-orange-500 rounded" />
+                className="w-5 h-5 text-orange-500 rounded-md border-gray-300 focus:ring-orange-500 cursor-pointer" />
             </div>
-            <div className="col-span-3"><span className="text-sm font-medium">{item.name}</span></div>
+            <div className="col-span-3"><span className="text-sm font-medium text-gray-700">{item.name}</span></div>
             <div className="col-span-3">
               <div className="flex items-center">
                 <span className="text-gray-400 text-sm mr-1">$</span>
                 <input type="text" inputMode="decimal" value={item.price} placeholder="0.00"
                   onChange={e => setProducts(prev => prev.map(p => p.id === item.id ? {...p, price: e.target.value} : p))}
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
-                <span className="text-gray-500 text-xs ml-1 whitespace-nowrap">{item.unit}</span>
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all" />
+                <span className="text-gray-400 text-xs ml-2 whitespace-nowrap">{item.unit}</span>
               </div>
             </div>
             <div className="col-span-2">
               <div className="flex items-center">
                 <input type="text" inputMode="decimal" value={item.discount} placeholder="0"
                   onChange={e => setProducts(prev => prev.map(p => p.id === item.id ? {...p, discount: e.target.value} : p))}
-                  className="w-16 px-2 py-1 text-sm border border-gray-300 rounded" />
-                <span className="text-gray-500 text-xs ml-1">%</span>
+                  className="w-16 px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all" />
+                <span className="text-gray-400 text-xs ml-1">%</span>
               </div>
             </div>
-            <div className="col-span-2 text-sm text-gray-600">
+            <div className="col-span-2 text-sm font-medium text-gray-600">
               {item.price && item.discount ? formatCurrency(calcDiscounted(item.price, item.discount)) : '—'}
             </div>
             <div className="col-span-1"></div>
@@ -718,7 +767,10 @@ export default function App() {
           </div>
         ))}
         <button type="button" onClick={() => setCustomIntegrations(prev => [...prev, { id: `custom-${Date.now()}`, name: '', price: '', unit: '/property/mo', discount: '' }])} 
-          className="mt-2 text-sm text-orange-600 hover:text-orange-700 font-medium">+ Add Custom Integration</button>
+          className="mt-4 text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1 transition-colors">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+          Add Custom Integration
+        </button>
       </InputSection>
 
       <InputSection title="Additional Fees">
@@ -803,7 +855,10 @@ export default function App() {
           </div>
         ))}
         <button type="button" onClick={() => setCustomFees(prev => [...prev, { id: `custom-fee-${Date.now()}`, name: '', price: '', unit: '/year', discount: '' }])}
-          className="mt-2 text-sm text-orange-600 hover:text-orange-700 font-medium">+ Add Custom Fee</button>
+          className="mt-4 text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1 transition-colors">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+          Add Custom Fee
+        </button>
       </InputSection>
 
       <InputSection title="Minimum Usage Tiers">
@@ -846,17 +901,22 @@ export default function App() {
           </div>
         ))}
         <button type="button" onClick={() => setMinimumUsage(prev => [...prev, { id: `tier-${Date.now()}`, startMonth: '', endMonth: '', amount: '', note: '' }])}
-          className="mt-2 text-sm text-orange-600 hover:text-orange-700 font-medium">+ Add Tier</button>
+          className="mt-4 text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1 transition-colors">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+          Add Tier
+        </button>
       </InputSection>
 
-      <div className="flex justify-center mt-8">
+      <div className="flex justify-center mt-10 mb-8">
         <button type="button" onClick={() => changeView('preview')}
-          className="px-8 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors shadow-lg">
+          className="px-10 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center gap-2">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
           Generate Order Form
         </button>
       </div>
       </>
       )}
+      </div>
     </div>
   );
 
@@ -869,13 +929,17 @@ export default function App() {
     return (
       <div className="bg-white min-h-screen">
         <div className="max-w-4xl mx-auto p-8">
-          <button type="button" onClick={() => changeView('input')} className="mb-4 text-sm text-orange-600 hover:text-orange-700 font-medium print:hidden">
-            ← Back to Editor
-          </button>
-          
-          <button type="button" onClick={cloneAsNewForm} className="mb-4 ml-4 text-sm text-blue-600 hover:text-blue-700 font-medium print:hidden">
-            Clone for New Customer
-          </button>
+          <div className="flex items-center gap-3 print:hidden">
+            <button type="button" onClick={() => changeView('input')} className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              Back to Editor
+            </button>
+            <span className="text-gray-300">|</span>
+            <button type="button" onClick={cloneAsNewForm} className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+              Clone for New Customer
+            </button>
+          </div>
 
           <div className="flex justify-between items-start mb-8 pb-4 border-b-2 border-gray-100">
             <FolioLogo />
@@ -1025,7 +1089,8 @@ export default function App() {
           </div>
 
           <div className="mt-8 flex justify-center gap-4 print:hidden">
-            <button type="button" onClick={() => window.print()} className="px-6 py-2 bg-gray-800 text-white rounded hover:bg-gray-900">
+            <button type="button" onClick={() => window.print()} className="px-8 py-3 bg-gradient-to-r from-gray-700 to-gray-800 text-white font-medium rounded-xl hover:from-gray-800 hover:to-gray-900 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
               Print / Save as PDF
             </button>
           </div>
