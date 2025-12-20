@@ -39,45 +39,29 @@ const formatDateDisplay = (dateStr) => {
 
 const DatePicker = ({ label, value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [viewYear, setViewYear] = useState(() => {
-    if (value) return new Date(value + 'T00:00:00').getFullYear();
-    return new Date().getFullYear();
-  });
-  const [viewMonth, setViewMonth] = useState(() => {
-    if (value) return new Date(value + 'T00:00:00').getMonth();
-    return new Date().getMonth();
-  });
+  const [viewYear, setViewYear] = useState(() => value ? new Date(value + 'T00:00:00').getFullYear() : new Date().getFullYear());
+  const [viewMonth, setViewMonth] = useState(() => value ? new Date(value + 'T00:00:00').getMonth() : new Date().getMonth());
   
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  
   const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
   
   const handlePrevMonth = (e) => {
     e.stopPropagation();
-    if (viewMonth === 0) {
-      setViewMonth(11);
-      setViewYear(viewYear - 1);
-    } else {
-      setViewMonth(viewMonth - 1);
-    }
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); } 
+    else { setViewMonth(viewMonth - 1); }
   };
   
   const handleNextMonth = (e) => {
     e.stopPropagation();
-    if (viewMonth === 11) {
-      setViewMonth(0);
-      setViewYear(viewYear + 1);
-    } else {
-      setViewMonth(viewMonth + 1);
-    }
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); } 
+    else { setViewMonth(viewMonth + 1); }
   };
   
   const handleSelectDate = (day) => {
-    const yyyy = viewYear;
     const mm = String(viewMonth + 1).padStart(2, '0');
     const dd = String(day).padStart(2, '0');
-    onChange(`${yyyy}-${mm}-${dd}`);
+    onChange(`${viewYear}-${mm}-${dd}`);
     setIsOpen(false);
   };
   
@@ -85,11 +69,7 @@ const DatePicker = ({ label, value, onChange }) => {
     const daysInMonth = getDaysInMonth(viewYear, viewMonth);
     const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
     const days = [];
-    
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="w-8 h-8"></div>);
-    }
-    
+    for (let i = 0; i < firstDay; i++) days.push(<div key={`empty-${i}`} className="w-8 h-8"></div>);
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const isSelected = value === dateStr;
@@ -103,20 +83,12 @@ const DatePicker = ({ label, value, onChange }) => {
     return days;
   };
   
-  const displayValue = value ? formatDateDisplay(value) : '';
-  
   return (
     <div className="mb-3 relative">
       <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
       <div className="relative">
-        <input 
-          type="text" 
-          value={displayValue} 
-          readOnly 
-          onClick={() => setIsOpen(!isOpen)} 
-          placeholder="Select date"
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer" 
-        />
+        <input type="text" value={value ? formatDateDisplay(value) : ''} readOnly onClick={() => setIsOpen(!isOpen)} placeholder="Select date"
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer" />
         {isOpen && (
           <div className="absolute z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-2">
@@ -139,6 +111,16 @@ const DatePicker = ({ label, value, onChange }) => {
   );
 };
 
+const calcDiscounted = (price, discount) => {
+  if (!price || !discount) return price;
+  return (parseFloat(price) * (1 - parseFloat(discount) / 100)).toFixed(2);
+};
+
+const formatCurrency = (val) => {
+  if (!val) return '';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+};
+
 const initialProducts = [
   { id: 'buy', name: 'Folio Buy', price: '', unit: '/property/mo', discount: '', enabled: false },
   { id: 'bills', name: 'Folio Bills', price: '', unit: '/property/mo', discount: '', enabled: false },
@@ -147,8 +129,8 @@ const initialProducts = [
 ];
 
 const initialIntegrations = [
-  { id: 'meez', name: 'Meez Recipe Management', price: '', unit: '/property/mo', discount: '', enabled: false, removable: true },
-  { id: 'sage', name: 'Sage Integration', price: '', unit: '/property/mo', discount: '', enabled: false, removable: true },
+  { id: 'meez', name: 'Meez Recipe Management', price: '', unit: '/property/mo', discount: '', enabled: false },
+  { id: 'sage', name: 'Sage Integration', price: '', unit: '/property/mo', discount: '', enabled: false },
 ];
 
 const initialAdditionalFees = [
@@ -165,95 +147,44 @@ const initialMinimumUsage = [
 
 export default function App() {
   const [view, setView] = useState('input');
-  const [customer, setCustomer] = useState({ name: '', address: '', addressLine2: '', contact: '', email: '' });
-  const [billing, setBilling] = useState({ billTo: '', address: '', addressLine2: '', contact: '', email: '', sameAsCustomer: false });
+  const [customerName, setCustomerName] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
+  const [customerAddressLine2, setCustomerAddressLine2] = useState('');
+  const [customerContact, setCustomerContact] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  
+  const [billingSame, setBillingSame] = useState(false);
+  const [billingBillTo, setBillingBillTo] = useState('');
+  const [billingAddress, setBillingAddress] = useState('');
+  const [billingAddressLine2, setBillingAddressLine2] = useState('');
+  const [billingEmail, setBillingEmail] = useState('');
+  
   const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
   const [expiryDate, setExpiryDate] = useState('');
-  const [contract, setContract] = useState({ startDate: '', initialTerm: '12 months', renewalTerm: '1 year', paymentTerms: 'Net 30', billingFrequency: 'Monthly' });
+  const [startDate, setStartDate] = useState('');
+  const [initialTerm, setInitialTerm] = useState('12 months');
+  const [renewalTerm, setRenewalTerm] = useState('1 year');
+  const [paymentTerms, setPaymentTerms] = useState('Net 30');
+  const [billingFrequency, setBillingFrequency] = useState('Monthly');
+  
   const [planName, setPlanName] = useState('');
   const [planDescription, setPlanDescription] = useState('');
+  
   const [products, setProducts] = useState(initialProducts);
   const [integrations, setIntegrations] = useState(initialIntegrations);
   const [additionalFees, setAdditionalFees] = useState(initialAdditionalFees);
-  const [minimumUsage, setMinimumUsage] = useState(initialMinimumUsage);
   const [customIntegrations, setCustomIntegrations] = useState([]);
   const [customFees, setCustomFees] = useState([]);
+  const [minimumUsage, setMinimumUsage] = useState(initialMinimumUsage);
 
   const handleBillingSameAsCustomer = (checked) => {
-    setBilling({
-      sameAsCustomer: checked,
-      billTo: checked ? customer.contact : '',
-      address: checked ? customer.address : '',
-      addressLine2: checked ? customer.addressLine2 : '',
-      contact: checked ? customer.name : '',
-      email: checked ? customer.email : '',
-    });
-  };
-
-  const updateCustomer = (field, value) => {
-    setCustomer(prev => ({ ...prev, [field]: value }));
-  };
-
-  const updateBilling = (field, value) => {
-    setBilling(prev => ({ ...prev, [field]: value }));
-  };
-
-  const updateContract = (field, value) => {
-    setContract(prev => ({ ...prev, [field]: value }));
-  };
-
-  const updateProductField = (id, field, value, list, setList) => {
-    setList(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
-  };
-
-  const addCustomIntegration = () => {
-    const newId = `custom-${Date.now()}`;
-    setCustomIntegrations(prev => [...prev, { id: newId, name: '', price: '', unit: '/property/mo', discount: '', enabled: true }]);
-  };
-
-  const removeCustomIntegration = (id) => {
-    setCustomIntegrations(prev => prev.filter(i => i.id !== id));
-  };
-
-  const removeIntegration = (id) => {
-    setIntegrations(prev => prev.filter(i => i.id !== id));
-  };
-
-  const addCustomFee = () => {
-    const newId = `custom-fee-${Date.now()}`;
-    setCustomFees(prev => [...prev, { id: newId, name: '', price: '', unit: '/year', discount: '', enabled: true }]);
-  };
-
-  const removeCustomFee = (id) => {
-    setCustomFees(prev => prev.filter(i => i.id !== id));
-  };
-
-  const updateMinimumUsage = (id, field, value) => {
-    setMinimumUsage(prev => prev.map(t => t.id === id ? { ...t, [field]: value } : t));
-  };
-
-  const addMinimumUsageTier = () => {
-    const newId = `tier-${Date.now()}`;
-    setMinimumUsage(prev => [...prev, { id: newId, startMonth: '', endMonth: '', amount: '', note: '' }]);
-  };
-
-  const removeMinimumUsageTier = (id) => {
-    setMinimumUsage(prev => prev.filter(t => t.id !== id));
-  };
-
-  const getTierLabel = (tier) => {
-    if (tier.endMonth) return `Months ${tier.startMonth}-${tier.endMonth}`;
-    return `Months ${tier.startMonth}+`;
-  };
-
-  const calcDiscounted = (price, discount) => {
-    if (!price || !discount) return price;
-    return (parseFloat(price) * (1 - parseFloat(discount) / 100)).toFixed(2);
-  };
-
-  const formatCurrency = (val) => {
-    if (!val) return '';
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+    setBillingSame(checked);
+    if (checked) {
+      setBillingBillTo(customerContact);
+      setBillingAddress(customerAddress);
+      setBillingAddressLine2(customerAddressLine2);
+      setBillingEmail(customerEmail);
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -261,104 +192,9 @@ export default function App() {
     return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
-  const ProductRow = ({ item, listKey, isCustom, onRemove }) => {
-    const getList = () => {
-      switch(listKey) {
-        case 'products': return products;
-        case 'integrations': return integrations;
-        case 'customIntegrations': return customIntegrations;
-        case 'additionalFees': return additionalFees;
-        case 'customFees': return customFees;
-        default: return [];
-      }
-    };
-    
-    const getSetList = () => {
-      switch(listKey) {
-        case 'products': return setProducts;
-        case 'integrations': return setIntegrations;
-        case 'customIntegrations': return setCustomIntegrations;
-        case 'additionalFees': return setAdditionalFees;
-        case 'customFees': return setCustomFees;
-        default: return () => {};
-      }
-    };
-
-    return (
-      <div className={`grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100 ${!item.enabled && !isCustom ? 'opacity-50' : ''}`}>
-        <div className="col-span-1">
-          {!isCustom && (
-            <input 
-              type="checkbox" 
-              checked={item.enabled} 
-              onChange={e => updateProductField(item.id, 'enabled', e.target.checked, getList(), getSetList())}
-              className="w-4 h-4 text-orange-500 rounded" 
-            />
-          )}
-        </div>
-        <div className="col-span-3">
-          {isCustom ? (
-            <input 
-              type="text" 
-              value={item.name} 
-              onChange={e => updateProductField(item.id, 'name', e.target.value, getList(), getSetList())}
-              placeholder="Name" 
-              className="w-full px-2 py-1 text-sm border border-gray-300 rounded" 
-            />
-          ) : (
-            <span className="text-sm font-medium">{item.name}</span>
-          )}
-        </div>
-        <div className="col-span-3">
-          <div className="flex items-center">
-            <span className="text-gray-400 text-sm mr-1">$</span>
-            <input 
-              type="text"
-              inputMode="decimal"
-              value={item.price} 
-              onChange={e => updateProductField(item.id, 'price', e.target.value, getList(), getSetList())}
-              placeholder="0.00" 
-              className="w-full px-2 py-1 text-sm border border-gray-300 rounded" 
-            />
-            {isCustom ? (
-              <select 
-                value={item.unit} 
-                onChange={e => updateProductField(item.id, 'unit', e.target.value, getList(), getSetList())}
-                className="ml-1 px-1 py-1 text-xs border border-gray-300 rounded"
-              >
-                <option value="/property/mo">/prop/mo</option>
-                <option value="/year">/year</option>
-                <option value="/property">/property</option>
-                <option value="/mo">/mo</option>
-              </select>
-            ) : (
-              <span className="text-gray-500 text-xs ml-1 whitespace-nowrap">{item.unit}</span>
-            )}
-          </div>
-        </div>
-        <div className="col-span-2">
-          <div className="flex items-center">
-            <input 
-              type="text"
-              inputMode="decimal"
-              value={item.discount} 
-              onChange={e => updateProductField(item.id, 'discount', e.target.value, getList(), getSetList())}
-              placeholder="0" 
-              className="w-16 px-2 py-1 text-sm border border-gray-300 rounded" 
-            />
-            <span className="text-gray-500 text-xs ml-1">%</span>
-          </div>
-        </div>
-        <div className="col-span-2 text-sm text-gray-600">
-          {item.price && item.discount ? formatCurrency(calcDiscounted(item.price, item.discount)) : '—'}
-        </div>
-        <div className="col-span-1">
-          {onRemove && (
-            <button type="button" onClick={onRemove} className="text-red-500 hover:text-red-700 text-sm">✕</button>
-          )}
-        </div>
-      </div>
-    );
+  const getTierLabel = (tier) => {
+    if (tier.endMonth) return `Months ${tier.startMonth}-${tier.endMonth}`;
+    return `Months ${tier.startMonth}+`;
   };
 
   const renderInputForm = () => (
@@ -370,22 +206,22 @@ export default function App() {
 
       <div className="grid grid-cols-2 gap-6">
         <InputSection title="Customer Information">
-          <TextField label="Customer Name" value={customer.name} onChange={v => updateCustomer('name', v)} placeholder="Company name" />
-          <TextField label="Address Line 1" value={customer.address} onChange={v => updateCustomer('address', v)} placeholder="Street address" />
-          <TextField label="Address Line 2" value={customer.addressLine2} onChange={v => updateCustomer('addressLine2', v)} placeholder="City, State ZIP" />
-          <TextField label="Contact Name" value={customer.contact} onChange={v => updateCustomer('contact', v)} placeholder="Primary contact" />
-          <TextField label="Contact Email" value={customer.email} onChange={v => updateCustomer('email', v)} placeholder="email@company.com" />
+          <TextField label="Customer Name" value={customerName} onChange={setCustomerName} placeholder="Company name" />
+          <TextField label="Address Line 1" value={customerAddress} onChange={setCustomerAddress} placeholder="Street address" />
+          <TextField label="Address Line 2" value={customerAddressLine2} onChange={setCustomerAddressLine2} placeholder="City, State ZIP" />
+          <TextField label="Contact Name" value={customerContact} onChange={setCustomerContact} placeholder="Primary contact" />
+          <TextField label="Contact Email" value={customerEmail} onChange={setCustomerEmail} placeholder="email@company.com" />
         </InputSection>
 
         <InputSection title="Billing Information">
           <label className="flex items-center gap-2 mb-3 text-sm">
-            <input type="checkbox" checked={billing.sameAsCustomer} onChange={e => handleBillingSameAsCustomer(e.target.checked)} className="w-4 h-4 text-orange-500 rounded" />
+            <input type="checkbox" checked={billingSame} onChange={e => handleBillingSameAsCustomer(e.target.checked)} className="w-4 h-4 text-orange-500 rounded" />
             Same as customer
           </label>
-          <TextField label="Bill To" value={billing.billTo} onChange={v => updateBilling('billTo', v)} placeholder="Billing contact" />
-          <TextField label="Billing Address" value={billing.address} onChange={v => updateBilling('address', v)} placeholder="Street address" />
-          <TextField label="Address Line 2" value={billing.addressLine2} onChange={v => updateBilling('addressLine2', v)} placeholder="City, State ZIP" />
-          <TextField label="Invoice Email" value={billing.email} onChange={v => updateBilling('email', v)} placeholder="billing@company.com" />
+          <TextField label="Bill To" value={billingBillTo} onChange={setBillingBillTo} placeholder="Billing contact" />
+          <TextField label="Billing Address" value={billingAddress} onChange={setBillingAddress} placeholder="Street address" />
+          <TextField label="Address Line 2" value={billingAddressLine2} onChange={setBillingAddressLine2} placeholder="City, State ZIP" />
+          <TextField label="Invoice Email" value={billingEmail} onChange={setBillingEmail} placeholder="billing@company.com" />
         </InputSection>
       </div>
 
@@ -396,22 +232,22 @@ export default function App() {
         </InputSection>
 
         <InputSection title="Contract Terms">
-          <DatePicker label="Start Date" value={contract.startDate} onChange={v => updateContract('startDate', v)} />
+          <DatePicker label="Start Date" value={startDate} onChange={setStartDate} />
           <div className="grid grid-cols-2 gap-3">
-            <TextField label="Initial Term" value={contract.initialTerm} onChange={v => updateContract('initialTerm', v)} placeholder="12 months" />
-            <TextField label="Renewal Term" value={contract.renewalTerm} onChange={v => updateContract('renewalTerm', v)} placeholder="1 year" />
+            <TextField label="Initial Term" value={initialTerm} onChange={setInitialTerm} placeholder="12 months" />
+            <TextField label="Renewal Term" value={renewalTerm} onChange={setRenewalTerm} placeholder="1 year" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="mb-3">
               <label className="block text-xs font-medium text-gray-600 mb-1">Payment Terms</label>
-              <select value={contract.paymentTerms} onChange={e => updateContract('paymentTerms', e.target.value)}
+              <select value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500">
                 <option>Net 15</option><option>Net 30</option><option>Net 45</option><option>Net 60</option>
               </select>
             </div>
             <div className="mb-3">
               <label className="block text-xs font-medium text-gray-600 mb-1">Billing Frequency</label>
-              <select value={contract.billingFrequency} onChange={e => updateContract('billingFrequency', e.target.value)}
+              <select value={billingFrequency} onChange={e => setBillingFrequency(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500">
                 <option>Monthly</option><option>Quarterly</option><option>Annually</option>
               </select>
@@ -436,7 +272,37 @@ export default function App() {
           <div className="col-span-2">Final Price</div>
           <div className="col-span-1"></div>
         </div>
-        {products.map(p => <ProductRow key={p.id} item={p} listKey="products" />)}
+        {products.map(item => (
+          <div key={item.id} className={`grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100 ${!item.enabled ? 'opacity-50' : ''}`}>
+            <div className="col-span-1">
+              <input type="checkbox" checked={item.enabled} 
+                onChange={e => setProducts(prev => prev.map(p => p.id === item.id ? {...p, enabled: e.target.checked} : p))}
+                className="w-4 h-4 text-orange-500 rounded" />
+            </div>
+            <div className="col-span-3"><span className="text-sm font-medium">{item.name}</span></div>
+            <div className="col-span-3">
+              <div className="flex items-center">
+                <span className="text-gray-400 text-sm mr-1">$</span>
+                <input type="text" inputMode="decimal" value={item.price} placeholder="0.00"
+                  onChange={e => setProducts(prev => prev.map(p => p.id === item.id ? {...p, price: e.target.value} : p))}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
+                <span className="text-gray-500 text-xs ml-1 whitespace-nowrap">{item.unit}</span>
+              </div>
+            </div>
+            <div className="col-span-2">
+              <div className="flex items-center">
+                <input type="text" inputMode="decimal" value={item.discount} placeholder="0"
+                  onChange={e => setProducts(prev => prev.map(p => p.id === item.id ? {...p, discount: e.target.value} : p))}
+                  className="w-16 px-2 py-1 text-sm border border-gray-300 rounded" />
+                <span className="text-gray-500 text-xs ml-1">%</span>
+              </div>
+            </div>
+            <div className="col-span-2 text-sm text-gray-600">
+              {item.price && item.discount ? formatCurrency(calcDiscounted(item.price, item.discount)) : '—'}
+            </div>
+            <div className="col-span-1"></div>
+          </div>
+        ))}
       </InputSection>
 
       <InputSection title="Integrations">
@@ -448,11 +314,82 @@ export default function App() {
           <div className="col-span-2">Final Price</div>
           <div className="col-span-1"></div>
         </div>
-        {integrations.map(p => <ProductRow key={p.id} item={p} listKey="integrations" onRemove={() => removeIntegration(p.id)} />)}
-        {customIntegrations.map(p => (
-          <ProductRow key={p.id} item={p} listKey="customIntegrations" isCustom onRemove={() => removeCustomIntegration(p.id)} />
+        {integrations.map(item => (
+          <div key={item.id} className={`grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100 ${!item.enabled ? 'opacity-50' : ''}`}>
+            <div className="col-span-1">
+              <input type="checkbox" checked={item.enabled}
+                onChange={e => setIntegrations(prev => prev.map(p => p.id === item.id ? {...p, enabled: e.target.checked} : p))}
+                className="w-4 h-4 text-orange-500 rounded" />
+            </div>
+            <div className="col-span-3"><span className="text-sm font-medium">{item.name}</span></div>
+            <div className="col-span-3">
+              <div className="flex items-center">
+                <span className="text-gray-400 text-sm mr-1">$</span>
+                <input type="text" inputMode="decimal" value={item.price} placeholder="0.00"
+                  onChange={e => setIntegrations(prev => prev.map(p => p.id === item.id ? {...p, price: e.target.value} : p))}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
+                <span className="text-gray-500 text-xs ml-1 whitespace-nowrap">{item.unit}</span>
+              </div>
+            </div>
+            <div className="col-span-2">
+              <div className="flex items-center">
+                <input type="text" inputMode="decimal" value={item.discount} placeholder="0"
+                  onChange={e => setIntegrations(prev => prev.map(p => p.id === item.id ? {...p, discount: e.target.value} : p))}
+                  className="w-16 px-2 py-1 text-sm border border-gray-300 rounded" />
+                <span className="text-gray-500 text-xs ml-1">%</span>
+              </div>
+            </div>
+            <div className="col-span-2 text-sm text-gray-600">
+              {item.price && item.discount ? formatCurrency(calcDiscounted(item.price, item.discount)) : '—'}
+            </div>
+            <div className="col-span-1">
+              <button type="button" onClick={() => setIntegrations(prev => prev.filter(p => p.id !== item.id))} 
+                className="text-red-500 hover:text-red-700 text-sm">✕</button>
+            </div>
+          </div>
         ))}
-        <button type="button" onClick={addCustomIntegration} className="mt-2 text-sm text-orange-600 hover:text-orange-700 font-medium">+ Add Custom Integration</button>
+        {customIntegrations.map(item => (
+          <div key={item.id} className="grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100">
+            <div className="col-span-1"></div>
+            <div className="col-span-3">
+              <input type="text" value={item.name} placeholder="Name"
+                onChange={e => setCustomIntegrations(prev => prev.map(p => p.id === item.id ? {...p, name: e.target.value} : p))}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
+            </div>
+            <div className="col-span-3">
+              <div className="flex items-center">
+                <span className="text-gray-400 text-sm mr-1">$</span>
+                <input type="text" inputMode="decimal" value={item.price} placeholder="0.00"
+                  onChange={e => setCustomIntegrations(prev => prev.map(p => p.id === item.id ? {...p, price: e.target.value} : p))}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
+                <select value={item.unit} onChange={e => setCustomIntegrations(prev => prev.map(p => p.id === item.id ? {...p, unit: e.target.value} : p))}
+                  className="ml-1 px-1 py-1 text-xs border border-gray-300 rounded">
+                  <option value="/property/mo">/prop/mo</option>
+                  <option value="/year">/year</option>
+                  <option value="/property">/property</option>
+                  <option value="/mo">/mo</option>
+                </select>
+              </div>
+            </div>
+            <div className="col-span-2">
+              <div className="flex items-center">
+                <input type="text" inputMode="decimal" value={item.discount} placeholder="0"
+                  onChange={e => setCustomIntegrations(prev => prev.map(p => p.id === item.id ? {...p, discount: e.target.value} : p))}
+                  className="w-16 px-2 py-1 text-sm border border-gray-300 rounded" />
+                <span className="text-gray-500 text-xs ml-1">%</span>
+              </div>
+            </div>
+            <div className="col-span-2 text-sm text-gray-600">
+              {item.price && item.discount ? formatCurrency(calcDiscounted(item.price, item.discount)) : '—'}
+            </div>
+            <div className="col-span-1">
+              <button type="button" onClick={() => setCustomIntegrations(prev => prev.filter(p => p.id !== item.id))}
+                className="text-red-500 hover:text-red-700 text-sm">✕</button>
+            </div>
+          </div>
+        ))}
+        <button type="button" onClick={() => setCustomIntegrations(prev => [...prev, { id: `custom-${Date.now()}`, name: '', price: '', unit: '/property/mo', discount: '' }])} 
+          className="mt-2 text-sm text-orange-600 hover:text-orange-700 font-medium">+ Add Custom Integration</button>
       </InputSection>
 
       <InputSection title="Additional Fees">
@@ -464,11 +401,79 @@ export default function App() {
           <div className="col-span-2">Final Price</div>
           <div className="col-span-1"></div>
         </div>
-        {additionalFees.map(p => <ProductRow key={p.id} item={p} listKey="additionalFees" />)}
-        {customFees.map(p => (
-          <ProductRow key={p.id} item={p} listKey="customFees" isCustom onRemove={() => removeCustomFee(p.id)} />
+        {additionalFees.map(item => (
+          <div key={item.id} className={`grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100 ${!item.enabled ? 'opacity-50' : ''}`}>
+            <div className="col-span-1">
+              <input type="checkbox" checked={item.enabled}
+                onChange={e => setAdditionalFees(prev => prev.map(p => p.id === item.id ? {...p, enabled: e.target.checked} : p))}
+                className="w-4 h-4 text-orange-500 rounded" />
+            </div>
+            <div className="col-span-3"><span className="text-sm font-medium">{item.name}</span></div>
+            <div className="col-span-3">
+              <div className="flex items-center">
+                <span className="text-gray-400 text-sm mr-1">$</span>
+                <input type="text" inputMode="decimal" value={item.price} placeholder="0.00"
+                  onChange={e => setAdditionalFees(prev => prev.map(p => p.id === item.id ? {...p, price: e.target.value} : p))}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
+                <span className="text-gray-500 text-xs ml-1 whitespace-nowrap">{item.unit}</span>
+              </div>
+            </div>
+            <div className="col-span-2">
+              <div className="flex items-center">
+                <input type="text" inputMode="decimal" value={item.discount} placeholder="0"
+                  onChange={e => setAdditionalFees(prev => prev.map(p => p.id === item.id ? {...p, discount: e.target.value} : p))}
+                  className="w-16 px-2 py-1 text-sm border border-gray-300 rounded" />
+                <span className="text-gray-500 text-xs ml-1">%</span>
+              </div>
+            </div>
+            <div className="col-span-2 text-sm text-gray-600">
+              {item.price && item.discount ? formatCurrency(calcDiscounted(item.price, item.discount)) : '—'}
+            </div>
+            <div className="col-span-1"></div>
+          </div>
         ))}
-        <button type="button" onClick={addCustomFee} className="mt-2 text-sm text-orange-600 hover:text-orange-700 font-medium">+ Add Custom Fee</button>
+        {customFees.map(item => (
+          <div key={item.id} className="grid grid-cols-12 gap-2 items-center py-2 border-b border-gray-100">
+            <div className="col-span-1"></div>
+            <div className="col-span-3">
+              <input type="text" value={item.name} placeholder="Name"
+                onChange={e => setCustomFees(prev => prev.map(p => p.id === item.id ? {...p, name: e.target.value} : p))}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
+            </div>
+            <div className="col-span-3">
+              <div className="flex items-center">
+                <span className="text-gray-400 text-sm mr-1">$</span>
+                <input type="text" inputMode="decimal" value={item.price} placeholder="0.00"
+                  onChange={e => setCustomFees(prev => prev.map(p => p.id === item.id ? {...p, price: e.target.value} : p))}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
+                <select value={item.unit} onChange={e => setCustomFees(prev => prev.map(p => p.id === item.id ? {...p, unit: e.target.value} : p))}
+                  className="ml-1 px-1 py-1 text-xs border border-gray-300 rounded">
+                  <option value="/property/mo">/prop/mo</option>
+                  <option value="/year">/year</option>
+                  <option value="/property">/property</option>
+                  <option value="/mo">/mo</option>
+                </select>
+              </div>
+            </div>
+            <div className="col-span-2">
+              <div className="flex items-center">
+                <input type="text" inputMode="decimal" value={item.discount} placeholder="0"
+                  onChange={e => setCustomFees(prev => prev.map(p => p.id === item.id ? {...p, discount: e.target.value} : p))}
+                  className="w-16 px-2 py-1 text-sm border border-gray-300 rounded" />
+                <span className="text-gray-500 text-xs ml-1">%</span>
+              </div>
+            </div>
+            <div className="col-span-2 text-sm text-gray-600">
+              {item.price && item.discount ? formatCurrency(calcDiscounted(item.price, item.discount)) : '—'}
+            </div>
+            <div className="col-span-1">
+              <button type="button" onClick={() => setCustomFees(prev => prev.filter(p => p.id !== item.id))}
+                className="text-red-500 hover:text-red-700 text-sm">✕</button>
+            </div>
+          </div>
+        ))}
+        <button type="button" onClick={() => setCustomFees(prev => [...prev, { id: `custom-fee-${Date.now()}`, name: '', price: '', unit: '/year', discount: '' }])}
+          className="mt-2 text-sm text-orange-600 hover:text-orange-700 font-medium">+ Add Custom Fee</button>
       </InputSection>
 
       <InputSection title="Minimum Usage Tiers">
@@ -483,52 +488,35 @@ export default function App() {
         {minimumUsage.map(tier => (
           <div key={tier.id} className="grid grid-cols-12 gap-2 mb-2 items-center">
             <div className="col-span-2">
-              <input 
-                type="text" 
-                inputMode="numeric" 
-                value={tier.startMonth} 
-                onChange={e => updateMinimumUsage(tier.id, 'startMonth', e.target.value)}
-                placeholder="1" 
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded" 
-              />
+              <input type="text" inputMode="numeric" value={tier.startMonth} placeholder="1"
+                onChange={e => setMinimumUsage(prev => prev.map(t => t.id === tier.id ? {...t, startMonth: e.target.value} : t))}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
             </div>
             <div className="col-span-2">
-              <input 
-                type="text" 
-                inputMode="numeric" 
-                value={tier.endMonth} 
-                onChange={e => updateMinimumUsage(tier.id, 'endMonth', e.target.value)}
-                placeholder="∞" 
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded" 
-              />
+              <input type="text" inputMode="numeric" value={tier.endMonth} placeholder="∞"
+                onChange={e => setMinimumUsage(prev => prev.map(t => t.id === tier.id ? {...t, endMonth: e.target.value} : t))}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
             </div>
             <div className="col-span-3 flex items-center">
               <span className="text-gray-400 text-sm mr-1">$</span>
-              <input 
-                type="text" 
-                inputMode="decimal" 
-                value={tier.amount} 
-                onChange={e => updateMinimumUsage(tier.id, 'amount', e.target.value)}
-                placeholder="0.00" 
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded" 
-              />
+              <input type="text" inputMode="decimal" value={tier.amount} placeholder="0.00"
+                onChange={e => setMinimumUsage(prev => prev.map(t => t.id === tier.id ? {...t, amount: e.target.value} : t))}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
               <span className="text-gray-500 text-xs ml-1">/mo</span>
             </div>
             <div className="col-span-4">
-              <input 
-                type="text" 
-                value={tier.note} 
-                onChange={e => updateMinimumUsage(tier.id, 'note', e.target.value)}
-                placeholder="e.g., assumes 3 properties" 
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded" 
-              />
+              <input type="text" value={tier.note} placeholder="e.g., assumes 3 properties"
+                onChange={e => setMinimumUsage(prev => prev.map(t => t.id === tier.id ? {...t, note: e.target.value} : t))}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded" />
             </div>
             <div className="col-span-1">
-              <button type="button" onClick={() => removeMinimumUsageTier(tier.id)} className="text-red-500 hover:text-red-700 text-sm">✕</button>
+              <button type="button" onClick={() => setMinimumUsage(prev => prev.filter(t => t.id !== tier.id))}
+                className="text-red-500 hover:text-red-700 text-sm">✕</button>
             </div>
           </div>
         ))}
-        <button type="button" onClick={addMinimumUsageTier} className="mt-2 text-sm text-orange-600 hover:text-orange-700 font-medium">+ Add Tier</button>
+        <button type="button" onClick={() => setMinimumUsage(prev => [...prev, { id: `tier-${Date.now()}`, startMonth: '', endMonth: '', amount: '', note: '' }])}
+          className="mt-2 text-sm text-orange-600 hover:text-orange-700 font-medium">+ Add Tier</button>
       </InputSection>
 
       <div className="flex justify-center mt-8">
@@ -572,19 +560,19 @@ export default function App() {
           <div className="border-l-4 border-orange-500 mb-6">
             <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Customer Information</h2>
             <div className="px-4 py-3 space-y-2">
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Customer:</span><span className="col-span-2">{customer.name}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Address:</span><span className="col-span-2">{customer.address}<br/>{customer.addressLine2}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Contact name:</span><span className="col-span-2">{customer.contact}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Contact email:</span><span className="col-span-2">{customer.email}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Customer:</span><span className="col-span-2">{customerName}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Address:</span><span className="col-span-2">{customerAddress}<br/>{customerAddressLine2}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Contact name:</span><span className="col-span-2">{customerContact}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Contact email:</span><span className="col-span-2">{customerEmail}</span></div>
             </div>
           </div>
 
           <div className="border-l-4 border-orange-500 mb-6">
             <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Billing Contact Information</h2>
             <div className="px-4 py-3 space-y-2">
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Bill To:</span><span className="col-span-2">{billing.billTo}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Billing Address:</span><span className="col-span-2">{billing.address}<br/>{billing.addressLine2}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Invoice Email:</span><span className="col-span-2">{billing.email}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Bill To:</span><span className="col-span-2">{billingBillTo}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Billing Address:</span><span className="col-span-2">{billingAddress}<br/>{billingAddressLine2}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Invoice Email:</span><span className="col-span-2">{billingEmail}</span></div>
             </div>
           </div>
 
@@ -600,11 +588,11 @@ export default function App() {
           <div className="border-l-4 border-orange-500 mb-6">
             <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Contract Terms</h2>
             <div className="px-4 py-3 space-y-2">
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Start Date:</span><span className="col-span-2">{formatDate(contract.startDate)}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Initial Contract Term:</span><span className="col-span-2">{contract.initialTerm}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Renewal Contract Term:</span><span className="col-span-2">{contract.renewalTerm}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Payment Terms:</span><span className="col-span-2">{contract.paymentTerms}</span></div>
-              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Billing Frequency:</span><span className="col-span-2">{contract.billingFrequency}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Start Date:</span><span className="col-span-2">{formatDate(startDate)}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Initial Contract Term:</span><span className="col-span-2">{initialTerm}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Renewal Contract Term:</span><span className="col-span-2">{renewalTerm}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Payment Terms:</span><span className="col-span-2">{paymentTerms}</span></div>
+              <div className="grid grid-cols-3 text-sm"><span className="font-medium">Billing Frequency:</span><span className="col-span-2">{billingFrequency}</span></div>
             </div>
           </div>
 
@@ -617,14 +605,8 @@ export default function App() {
                     <span className="font-medium">{p.name}:</span>
                     <span className="col-span-2">
                       {p.discount ? (
-                        <>
-                          {formatCurrency(calcDiscounted(p.price, p.discount))}{p.unit}{' '}
-                          <span className="line-through text-gray-400">{formatCurrency(p.price)}{p.unit}</span>{' '}
-                          <span className="text-green-600 font-medium">{p.discount}% discount</span>
-                        </>
-                      ) : (
-                        <>{formatCurrency(p.price)}{p.unit}</>
-                      )}
+                        <>{formatCurrency(calcDiscounted(p.price, p.discount))}{p.unit} <span className="line-through text-gray-400">{formatCurrency(p.price)}{p.unit}</span> <span className="text-green-600 font-medium">{p.discount}% discount</span></>
+                      ) : (<>{formatCurrency(p.price)}{p.unit}</>)}
                     </span>
                   </div>
                 ))}
@@ -641,14 +623,8 @@ export default function App() {
                     <span className="font-medium">{p.name}:</span>
                     <span className="col-span-2">
                       {p.discount ? (
-                        <>
-                          {formatCurrency(calcDiscounted(p.price, p.discount))}{p.unit}{' '}
-                          <span className="line-through text-gray-400">{formatCurrency(p.price)}{p.unit}</span>{' '}
-                          <span className="text-green-600 font-medium">{p.discount}% discount</span>
-                        </>
-                      ) : (
-                        <>{formatCurrency(p.price)}{p.unit}</>
-                      )}
+                        <>{formatCurrency(calcDiscounted(p.price, p.discount))}{p.unit} <span className="line-through text-gray-400">{formatCurrency(p.price)}{p.unit}</span> <span className="text-green-600 font-medium">{p.discount}% discount</span></>
+                      ) : (<>{formatCurrency(p.price)}{p.unit}</>)}
                     </span>
                   </div>
                 ))}
@@ -665,14 +641,8 @@ export default function App() {
                     <span className="font-medium">{p.name}:</span>
                     <span className="col-span-2">
                       {p.discount ? (
-                        <>
-                          {formatCurrency(calcDiscounted(p.price, p.discount))}{p.unit}{' '}
-                          <span className="line-through text-gray-400">{formatCurrency(p.price)}{p.unit}</span>{' '}
-                          <span className="text-green-600 font-medium">{p.discount}% discount</span>
-                        </>
-                      ) : (
-                        <>{formatCurrency(p.price)}{p.unit}</>
-                      )}
+                        <>{formatCurrency(calcDiscounted(p.price, p.discount))}{p.unit} <span className="line-through text-gray-400">{formatCurrency(p.price)}{p.unit}</span> <span className="text-green-600 font-medium">{p.discount}% discount</span></>
+                      ) : (<>{formatCurrency(p.price)}{p.unit}</>)}
                     </span>
                   </div>
                 ))}
@@ -712,7 +682,7 @@ export default function App() {
               <div>
                 <div className="border-b border-gray-400 mb-2 h-12"></div>
                 <p className="text-sm"><span className="font-medium">Name:</span></p>
-                <p className="text-sm"><span className="font-medium">Company:</span> {customer.name}</p>
+                <p className="text-sm"><span className="font-medium">Company:</span> {customerName}</p>
                 <p className="text-sm"><span className="font-medium">Title:</span></p>
               </div>
             </div>
