@@ -199,7 +199,7 @@ const ProductRow = ({ item, onUpdate, showDelete, onDelete, theme }) => {
 };
 
 export default function App() {
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
   const [view, setView] = useState('input');
   const [activeTab, setActiveTab] = useState('form');
   const [templates, setTemplates] = useState([]);
