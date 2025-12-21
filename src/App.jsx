@@ -155,8 +155,9 @@ const initialTiers = [
   { id: 'tier4', startMonth: '13', endMonth: '', amount: '', note: '' },
 ];
 
-const ProductRow = ({ item, onUpdate, showDelete, onDelete, theme }) => {
+const ProductRow = ({ item, onUpdate, showDelete, onDelete, theme, showUnitDropdown }) => {
   const final = item.price && item.discount ? formatCurrency(calcDiscounted(item.price, item.discount)) : null;
+  const units = ['/property/mo', '/mo', '/year', '/property', ' (one-time)'];
   return (
     <div className={`grid grid-cols-12 gap-3 items-center py-3 border-b transition-all duration-300 ${theme.dark ? 'border-white/5' : 'border-gray-100'} ${item.enabled !== undefined && !item.enabled ? 'opacity-40' : ''}`}>
       {item.enabled !== undefined && (
@@ -178,7 +179,14 @@ const ProductRow = ({ item, onUpdate, showDelete, onDelete, theme }) => {
           <span className={theme.textMuted}>$</span>
           <input type="text" inputMode="decimal" value={item.price} placeholder="0.00" onChange={e => onUpdate({ ...item, price: e.target.value })}
             className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:border-orange-500/50 ${theme.input}`} />
-          <span className={`text-xs whitespace-nowrap ${theme.textMuted}`}>{item.unit}</span>
+          {showUnitDropdown ? (
+            <select value={item.unit} onChange={e => onUpdate({ ...item, unit: e.target.value })}
+              className={`px-2 py-2 text-xs border rounded-lg focus:outline-none cursor-pointer ${theme.input}`}>
+              {units.map(u => <option key={u} value={u} className={theme.select}>{u}</option>)}
+            </select>
+          ) : (
+            <span className={`text-xs whitespace-nowrap ${theme.textMuted}`}>{item.unit}</span>
+          )}
         </div>
       </div>
       <div className="col-span-2">
@@ -620,15 +628,15 @@ export default function App() {
               <div className={`grid grid-cols-12 gap-3 text-xs font-medium uppercase tracking-wider mb-3 pb-3 border-b ${darkMode ? 'text-white/30 border-white/10' : 'text-gray-400 border-gray-200'}`}>
                 <div className="col-span-1"></div><div className="col-span-3">Product</div><div className="col-span-3">Price</div><div className="col-span-2">Discount</div><div className="col-span-2">Final</div><div className="col-span-1"></div>
               </div>
-              {products.map(item => <ProductRow key={item.id} item={item} theme={t} onUpdate={u => setProducts(prev => prev.map(p => p.id === item.id ? u : p))} />)}
+              {products.map(item => <ProductRow key={item.id} item={item} theme={t} showUnitDropdown onUpdate={u => setProducts(prev => prev.map(p => p.id === item.id ? u : p))} />)}
             </Section>
 
             <Section title="Integrations" icon="🔗" theme={t}>
               <div className={`grid grid-cols-12 gap-3 text-xs font-medium uppercase tracking-wider mb-3 pb-3 border-b ${darkMode ? 'text-white/30 border-white/10' : 'text-gray-400 border-gray-200'}`}>
                 <div className="col-span-1"></div><div className="col-span-3">Integration</div><div className="col-span-3">Price</div><div className="col-span-2">Discount</div><div className="col-span-2">Final</div><div className="col-span-1"></div>
               </div>
-              {integrations.map(item => <ProductRow key={item.id} item={item} theme={t} onUpdate={u => setIntegrations(prev => prev.map(p => p.id === item.id ? u : p))} />)}
-              {customIntegrations.map(item => <ProductRow key={item.id} item={{...item, editable: true}} theme={t} showDelete onUpdate={u => setCustomIntegrations(prev => prev.map(p => p.id === item.id ? u : p))} onDelete={() => setCustomIntegrations(prev => prev.filter(p => p.id !== item.id))} />)}
+              {integrations.map(item => <ProductRow key={item.id} item={item} theme={t} showUnitDropdown onUpdate={u => setIntegrations(prev => prev.map(p => p.id === item.id ? u : p))} />)}
+              {customIntegrations.map(item => <ProductRow key={item.id} item={{...item, editable: true}} theme={t} showUnitDropdown showDelete onUpdate={u => setCustomIntegrations(prev => prev.map(p => p.id === item.id ? u : p))} onDelete={() => setCustomIntegrations(prev => prev.filter(p => p.id !== item.id))} />)}
               <button onClick={() => setCustomIntegrations(prev => [...prev, { id: `ci-${Date.now()}`, name: '', price: '', unit: '/property/mo', discount: '' }])} className="mt-4 text-sm text-orange-400 hover:text-orange-300 font-medium flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                 Add Custom Integration
@@ -639,8 +647,8 @@ export default function App() {
               <div className={`grid grid-cols-12 gap-3 text-xs font-medium uppercase tracking-wider mb-3 pb-3 border-b ${darkMode ? 'text-white/30 border-white/10' : 'text-gray-400 border-gray-200'}`}>
                 <div className="col-span-1"></div><div className="col-span-3">Fee</div><div className="col-span-3">Price</div><div className="col-span-2">Discount</div><div className="col-span-2">Final</div><div className="col-span-1"></div>
               </div>
-              {additionalFees.map(item => <ProductRow key={item.id} item={item} theme={t} onUpdate={u => setAdditionalFees(prev => prev.map(p => p.id === item.id ? u : p))} />)}
-              {customFees.map(item => <ProductRow key={item.id} item={{...item, editable: true}} theme={t} showDelete onUpdate={u => setCustomFees(prev => prev.map(p => p.id === item.id ? u : p))} onDelete={() => setCustomFees(prev => prev.filter(p => p.id !== item.id))} />)}
+              {additionalFees.map(item => <ProductRow key={item.id} item={item} theme={t} showUnitDropdown onUpdate={u => setAdditionalFees(prev => prev.map(p => p.id === item.id ? u : p))} />)}
+              {customFees.map(item => <ProductRow key={item.id} item={{...item, editable: true}} theme={t} showUnitDropdown showDelete onUpdate={u => setCustomFees(prev => prev.map(p => p.id === item.id ? u : p))} onDelete={() => setCustomFees(prev => prev.filter(p => p.id !== item.id))} />)}
               <button onClick={() => setCustomFees(prev => [...prev, { id: `cf-${Date.now()}`, name: '', price: '', unit: '/year', discount: '' }])} className="mt-4 text-sm text-orange-400 hover:text-orange-300 font-medium flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                 Add Custom Fee
