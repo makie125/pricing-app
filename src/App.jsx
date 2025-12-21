@@ -41,7 +41,7 @@ const Section = ({ title, children, defaultOpen = true, icon, theme }) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-      <div className={`transition-all duration-500 ease-out ${open ? 'max-h-[2000px] opacity-100 mt-3' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+      <div className={`transition-all duration-500 ease-out ${open ? 'opacity-100 mt-3' : 'max-h-0 opacity-0 overflow-hidden'}`}>
         <div className={`backdrop-blur-xl border rounded-2xl p-5 ${theme.card}`}>{children}</div>
       </div>
     </div>
@@ -115,9 +115,10 @@ const DatePicker = ({ label, value, onChange, theme }) => {
       </div>
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0 z-50" onClick={() => setIsOpen(false)} />
           <div 
-            className={`absolute z-50 mt-2 backdrop-blur-xl border rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900 border-white/10' : 'bg-white border-gray-200'}`}
+            className={`fixed z-50 backdrop-blur-xl border rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900 border-white/10' : 'bg-white border-gray-200'}`}
+            style={{ top: position.top, left: Math.min(position.left, window.innerWidth - 300) }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
