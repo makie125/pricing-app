@@ -301,66 +301,169 @@ export default function App() {
     const enabledIntegrations = [...integrations.filter(p => p.enabled), ...customIntegrations.filter(p => p.name)];
     const enabledFees = [...additionalFees.filter(p => p.enabled), ...customFees.filter(p => p.name)];
 
+    const TableRow = ({ label, value, isLast }) => (
+      <div className={`flex ${!isLast ? 'border-b border-gray-200' : ''}`}>
+        <div className="w-40 flex-shrink-0 py-3 px-4 border-r border-gray-200 flex items-start">
+          <span className="text-orange-500 mr-2">●</span>
+          <span className="font-semibold text-gray-700 text-sm">{label}</span>
+        </div>
+        <div className="flex-1 py-3 px-4">
+          <span className="text-gray-600 text-sm whitespace-pre-line">{value}</span>
+        </div>
+      </div>
+    );
+
+    const SectionTable = ({ title, rows }) => (
+      <div className="border border-gray-200 rounded-lg mb-6 overflow-hidden">
+        <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
+          <h2 className="text-sm font-bold text-orange-500 uppercase tracking-wide">{title}</h2>
+        </div>
+        <div>
+          {rows.map((row, i) => (
+            <TableRow key={row.label} label={row.label} value={row.value} isLast={i === rows.length - 1} />
+          ))}
+        </div>
+      </div>
+    );
+
     return (
       <div className="bg-white min-h-screen">
         <div className="max-w-4xl mx-auto p-8">
-          <button onClick={() => setView('input')} className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1 mb-6">
+          <button onClick={() => setView('input')} className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1 mb-6 print:hidden">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             Back to Editor
           </button>
           
-          <div className="flex justify-between items-start mb-8 pb-4 border-b-2 border-gray-100">
+          <div className="flex justify-between items-start mb-12">
             <div className="flex items-center gap-3">
               <div className="grid grid-cols-3 gap-0.5">
                 {[1,1,1,1,1,0,1,0,0].map((f, i) => <div key={i} className={`w-2.5 h-2.5 rounded-sm ${f ? 'bg-orange-500' : 'border-2 border-orange-500'}`} />)}
               </div>
               <span className="text-xl font-bold text-orange-500">FOLIO</span>
             </div>
-            <div className="text-right text-sm text-gray-600">
-              <p className="font-medium">Folio Services, Inc.</p>
-              <p>3600 North Duke St, Suite 1 #1197</p>
+            <div className="text-right text-sm text-gray-500">
+              <p className="font-medium text-gray-700">Folio Services, Inc.</p>
+              <p>3600 North Duke St</p>
+              <p>Suite 1 #1197</p>
               <p>Durham, NC 27704</p>
+              <p>1-855-943-2285</p>
             </div>
           </div>
 
-          <h1 className="text-3xl font-light text-center text-gray-800 mb-2">Folio Order Form</h1>
-          <p className="text-center text-sm text-gray-500 mb-8">Quote date: {formatDate(quoteDate)} | Quote expiry: {formatDate(expiryDate)}</p>
+          <h1 className="text-3xl font-light text-center text-gray-800 mb-3">Folio Order Form</h1>
+          <p className="text-center text-sm text-gray-500 mb-10">
+            Quote date: {formatDate(quoteDate)} | <span className="underline">Quote expiry:</span> {formatDate(expiryDate)}
+          </p>
 
-          {[
-            { title: 'Customer Information', rows: [['Customer:', customerName], ['Address:', `${customerAddress} ${customerAddressLine2}`], ['Contact:', customerContact], ['Email:', customerEmail]] },
-            { title: 'Billing Information', rows: [['Bill To:', billingBillTo], ['Address:', `${billingAddress} ${billingAddressLine2}`], ['Email:', billingEmail]] },
-            { title: 'Contract Terms', rows: [['Start Date:', formatDate(startDate)], ['Initial Term:', initialTerm], ['Renewal Term:', renewalTerm], ['Payment Terms:', paymentTerms], ['Billing:', billingFrequency]] },
-          ].map(section => (
-            <div key={section.title} className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
-              <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">{section.title}</h2>
-              <div className="px-4 py-3">
-                {section.rows.map(([label, val]) => (
-                  <div key={label} className="grid grid-cols-3 text-sm border-b border-gray-100 py-2">
-                    <span className="font-medium">{label}</span>
-                    <span className="col-span-2">{val}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+          <SectionTable 
+            title="Customer Information" 
+            rows={[
+              { label: 'Customer:', value: customerName },
+              { label: 'Address:', value: `${customerAddress}\n${customerAddressLine2}` },
+              { label: 'Contact name:', value: customerContact },
+              { label: 'Contact email:', value: customerEmail },
+            ]} 
+          />
 
-          {enabledProducts.length > 0 && (
-            <div className="border-l-4 border-orange-500 mb-6 border border-gray-300 rounded">
-              <h2 className="text-sm font-semibold text-orange-600 uppercase px-4 py-2 bg-gray-50">Product Fees</h2>
-              <div className="px-4 py-3">
-                {enabledProducts.map(p => (
-                  <div key={p.id} className="grid grid-cols-3 text-sm py-2 border-b border-gray-100">
-                    <span className="font-medium">{p.name}:</span>
-                    <span className="col-span-2">
-                      {p.discount ? <>{formatCurrency(calcDiscounted(p.price, p.discount))}{p.unit} <span className="line-through text-gray-400">{formatCurrency(p.price)}</span> <span className="text-green-600">{p.discount}% off</span></> : <>{formatCurrency(p.price)}{p.unit}</>}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <SectionTable 
+            title="Billing Contact Information" 
+            rows={[
+              { label: 'Bill To:', value: billingBillTo },
+              { label: 'Billing Address:', value: `${billingAddress}\n${billingAddressLine2}` },
+              { label: 'Invoice Email:', value: billingEmail },
+            ]} 
+          />
+
+          {(planName || planDescription) && (
+            <SectionTable 
+              title="Package" 
+              rows={[
+                { label: 'Plan:', value: `${planName}\n${planDescription}` },
+              ]} 
+            />
           )}
 
-          <div className="mt-8 flex justify-center">
+          <SectionTable 
+            title="Contract Terms" 
+            rows={[
+              { label: 'Start Date:', value: formatDate(startDate) },
+              { label: 'Initial Contract Term:', value: initialTerm },
+              { label: 'Renewal Contract Term:', value: renewalTerm },
+              { label: 'Payment Terms:', value: paymentTerms },
+              { label: 'Billing Frequency:', value: billingFrequency },
+            ]} 
+          />
+
+          {enabledProducts.length > 0 && (
+            <SectionTable 
+              title="Product Fees" 
+              rows={enabledProducts.map(p => ({
+                label: `${p.name}:`,
+                value: p.discount 
+                  ? `${formatCurrency(calcDiscounted(p.price, p.discount))}${p.unit}  (${p.discount}% discount from ${formatCurrency(p.price)})`
+                  : `${formatCurrency(p.price)}${p.unit}`
+              }))} 
+            />
+          )}
+
+          {enabledIntegrations.length > 0 && (
+            <SectionTable 
+              title="Integrations" 
+              rows={enabledIntegrations.map(p => ({
+                label: `${p.name}:`,
+                value: p.discount 
+                  ? `${formatCurrency(calcDiscounted(p.price, p.discount))}${p.unit}  (${p.discount}% discount from ${formatCurrency(p.price)})`
+                  : `${formatCurrency(p.price)}${p.unit}`
+              }))} 
+            />
+          )}
+
+          {enabledFees.length > 0 && (
+            <SectionTable 
+              title="Additional Fees" 
+              rows={enabledFees.map(p => ({
+                label: `${p.name}:`,
+                value: p.discount 
+                  ? `${formatCurrency(calcDiscounted(p.price, p.discount))}${p.unit}  (${p.discount}% discount from ${formatCurrency(p.price)})`
+                  : `${formatCurrency(p.price)}${p.unit}`
+              }))} 
+            />
+          )}
+
+          {minimumUsage.filter(t => t.amount).length > 0 && (
+            <SectionTable 
+              title="Minimum Usage" 
+              rows={minimumUsage.filter(t => t.amount).map(t => ({
+                label: t.endMonth ? `Months ${t.startMonth}-${t.endMonth}:` : `Months ${t.startMonth}+:`,
+                value: `${formatCurrency(t.amount)}/mo${t.note ? `\n(${t.note})` : ''}`
+              }))} 
+            />
+          )}
+
+          <div className="mt-16 pt-8 border-t border-gray-200">
+            <p className="text-sm text-gray-600 mb-6">
+              This Order Form is entered into by and between Folio Services, Inc. ("Folio") and the Customer identified herein ("Customer") pursuant to, and is governed by the terms of the Master Services Terms and Conditions attached as Exhibit 3 (the "Master Terms")
+            </p>
+            <p className="text-sm text-gray-600 mb-10">
+              The above contract terms are accepted and agreed to as of the date of last signature by an authorized signatory of each party:
+            </p>
+            <div className="grid grid-cols-2 gap-16">
+              <div>
+                <div className="border-b border-gray-400 mb-3 h-16"></div>
+                <p className="text-sm"><span className="font-semibold">Name:</span> Kate Adamson</p>
+                <p className="text-sm"><span className="font-semibold">Company:</span> Folio Services, Inc.</p>
+                <p className="text-sm"><span className="font-semibold">Title:</span> Co-founder & CEO</p>
+              </div>
+              <div>
+                <div className="border-b border-gray-400 mb-3 h-16"></div>
+                <p className="text-sm"><span className="font-semibold">Name:</span></p>
+                <p className="text-sm"><span className="font-semibold">Company:</span> {customerName}</p>
+                <p className="text-sm"><span className="font-semibold">Title:</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 flex justify-center print:hidden">
             <button onClick={() => window.print()} className="px-8 py-3 bg-gray-800 text-white font-medium rounded-xl hover:bg-gray-900 transition-all flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
               Print / Save as PDF
