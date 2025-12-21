@@ -60,8 +60,8 @@ const DatePicker = ({ label, value, onChange, theme }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const inputRef = React.useRef(null);
-  const [viewYear, setViewYear] = useState(() => value ? new Date(value + 'T00:00:00').getFullYear() : new Date().getFullYear());
-  const [viewMonth, setViewMonth] = useState(() => value ? new Date(value + 'T00:00:00').getMonth() : new Date().getMonth());
+  const [viewYear, setViewYear] = useState(value ? new Date(value + 'T00:00:00').getFullYear() : new Date().getFullYear());
+  const [viewMonth, setViewMonth] = useState(value ? new Date(value + 'T00:00:00').getMonth() : new Date().getMonth());
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const formatDisplay = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
   const getDays = (y, m) => new Date(y, m + 1, 0).getDate();
@@ -71,9 +71,9 @@ const DatePicker = ({ label, value, onChange, theme }) => {
   const handleOpen = () => {
     if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect();
-      setPosition({ top: rect.bottom + 8, left: rect.left });
+      setPosition({ top: rect.bottom + window.scrollY + 8, left: rect.left + window.scrollX });
     }
-    setIsOpen(!isOpen);
+    setIsOpen(true);
   };
   
   const handleSelect = (day) => {
@@ -81,26 +81,51 @@ const DatePicker = ({ label, value, onChange, theme }) => {
     setIsOpen(false);
   };
 
+  const handlePrevMonth = (e) => {
+    e.stopPropagation();
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear(viewYear - 1);
+    } else {
+      setViewMonth(viewMonth - 1);
+    }
+  };
+
+  const handleNextMonth = (e) => {
+    e.stopPropagation();
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear(viewYear + 1);
+    } else {
+      setViewMonth(viewMonth + 1);
+    }
+  };
+
   return (
     <div className="mb-4 relative group">
       <label className={`block text-xs font-medium mb-2 uppercase tracking-wider ${theme.textMuted}`}>{label}</label>
-      <div className="relative" ref={inputRef}>
-        <input type="text" value={formatDisplay(value)} readOnly onClick={handleOpen} placeholder="Select date"
-          className={`w-full px-4 py-3 text-sm border rounded-xl cursor-pointer focus:outline-none transition-all ${theme.input} ${theme.inputFocus}`} />
-        <svg className={`absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 ${theme.textMuted}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
+      <div ref={inputRef}>
+        <div className="relative">
+          <input type="text" value={formatDisplay(value)} readOnly onClick={handleOpen} placeholder="Select date"
+            className={`w-full px-4 py-3 text-sm border rounded-xl cursor-pointer focus:outline-none transition-all ${theme.input} ${theme.inputFocus}`} />
+          <svg className={`absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none ${theme.textMuted}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
       </div>
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className={`fixed z-50 backdrop-blur-xl border rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900/95 border-white/10' : 'bg-white border-gray-200'}`} style={{ top: position.top, left: position.left }}>
+          <div 
+            className={`absolute z-50 mt-2 backdrop-blur-xl border rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900 border-white/10' : 'bg-white border-gray-200'}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-4">
-              <button type="button" onClick={(e) => { e.stopPropagation(); setViewMonth(viewMonth === 0 ? 11 : viewMonth - 1); if(viewMonth === 0) setViewYear(viewYear - 1); }} className={`p-2 rounded-lg transition-colors ${dark ? 'hover:bg-white/10 text-white/60' : 'hover:bg-gray-100 text-gray-600'}`}>
+              <button type="button" onClick={handlePrevMonth} className={`p-2 rounded-lg transition-colors ${dark ? 'hover:bg-white/10 text-white/60' : 'hover:bg-gray-100 text-gray-600'}`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
               </button>
               <span className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>{months[viewMonth]} {viewYear}</span>
-              <button type="button" onClick={(e) => { e.stopPropagation(); setViewMonth(viewMonth === 11 ? 0 : viewMonth + 1); if(viewMonth === 11) setViewYear(viewYear + 1); }} className={`p-2 rounded-lg transition-colors ${dark ? 'hover:bg-white/10 text-white/60' : 'hover:bg-gray-100 text-gray-600'}`}>
+              <button type="button" onClick={handleNextMonth} className={`p-2 rounded-lg transition-colors ${dark ? 'hover:bg-white/10 text-white/60' : 'hover:bg-gray-100 text-gray-600'}`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
             </div>
