@@ -31,7 +31,7 @@ const ThemeToggle = ({ dark, setDark }) => (
 const Section = ({ title, children, defaultOpen = true, icon, theme }) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="mb-4">
+    <div className="mb-4" style={{ position: 'relative', zIndex: 1 }}>
       <button onClick={() => setOpen(!open)} className={`w-full flex items-center justify-between px-5 py-4 backdrop-blur-xl border rounded-2xl transition-all duration-300 group ${theme.card} ${theme.cardHover}`}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-sm shadow-lg shadow-orange-500/20">{icon}</div>
@@ -41,9 +41,11 @@ const Section = ({ title, children, defaultOpen = true, icon, theme }) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-      <div className={`transition-all duration-500 ease-out ${open ? 'opacity-100 mt-3' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-        <div className={`backdrop-blur-xl border rounded-2xl p-5 ${theme.card}`}>{children}</div>
-      </div>
+      {open && (
+        <div className="mt-3">
+          <div className={`backdrop-blur-xl border rounded-2xl p-5 ${theme.card}`}>{children}</div>
+        </div>
+      )}
     </div>
   );
 };
@@ -58,8 +60,7 @@ const TextField = ({ label, value, onChange, placeholder, theme }) => (
 
 const DatePicker = ({ label, value, onChange, theme }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-  const inputRef = React.useRef(null);
+  const containerRef = React.useRef(null);
   const [viewYear, setViewYear] = useState(value ? new Date(value + 'T00:00:00').getFullYear() : new Date().getFullYear());
   const [viewMonth, setViewMonth] = useState(value ? new Date(value + 'T00:00:00').getMonth() : new Date().getMonth());
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -67,14 +68,6 @@ const DatePicker = ({ label, value, onChange, theme }) => {
   const getDays = (y, m) => new Date(y, m + 1, 0).getDate();
   const getFirst = (y, m) => new Date(y, m, 1).getDay();
   const dark = theme.dark;
-  
-  const handleOpen = () => {
-    if (inputRef.current) {
-      const rect = inputRef.current.getBoundingClientRect();
-      setPosition({ top: rect.bottom + window.scrollY + 8, left: rect.left + window.scrollX });
-    }
-    setIsOpen(true);
-  };
   
   const handleSelect = (day) => {
     onChange(`${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
@@ -102,23 +95,21 @@ const DatePicker = ({ label, value, onChange, theme }) => {
   };
 
   return (
-    <div className="mb-4 relative group">
+    <div className="mb-4" ref={containerRef} style={{ position: 'relative', zIndex: isOpen ? 100 : 1 }}>
       <label className={`block text-xs font-medium mb-2 uppercase tracking-wider ${theme.textMuted}`}>{label}</label>
-      <div ref={inputRef}>
-        <div className="relative">
-          <input type="text" value={formatDisplay(value)} readOnly onClick={handleOpen} placeholder="Select date"
-            className={`w-full px-4 py-3 text-sm border rounded-xl cursor-pointer focus:outline-none transition-all ${theme.input} ${theme.inputFocus}`} />
-          <svg className={`absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none ${theme.textMuted}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        </div>
+      <div className="relative">
+        <input type="text" value={formatDisplay(value)} readOnly onClick={() => setIsOpen(!isOpen)} placeholder="Select date"
+          className={`w-full px-4 py-3 text-sm border rounded-xl cursor-pointer focus:outline-none transition-all ${theme.input} ${theme.inputFocus}`} />
+        <svg className={`absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none ${theme.textMuted}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
       </div>
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-50" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0" style={{ zIndex: 98 }} onClick={() => setIsOpen(false)} />
           <div 
-            className={`fixed z-50 backdrop-blur-xl border rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900 border-white/10' : 'bg-white border-gray-200'}`}
-            style={{ top: position.top, left: Math.min(position.left, window.innerWidth - 300) }}
+            style={{ position: 'absolute', top: '100%', left: 0, marginTop: '8px', zIndex: 99 }}
+            className={`backdrop-blur-xl border rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900 border-white/10' : 'bg-white border-gray-200'}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
