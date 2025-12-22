@@ -32,7 +32,7 @@ const Section = ({ title, children, defaultOpen = true, icon, theme }) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="mb-4">
-      <button onClick={() => setOpen(!open)} className={`w-full flex items-center justify-between px-5 py-4 backdrop-blur-xl border rounded-2xl transition-all duration-300 group ${theme.card} ${theme.cardHover}`}>
+      <button onClick={() => setOpen(!open)} className={`w-full flex items-center justify-between px-5 py-4 border rounded-2xl transition-all duration-300 group ${theme.card} ${theme.cardHover}`}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-sm shadow-lg shadow-orange-500/20">{icon}</div>
           <span className={`font-semibold text-sm uppercase tracking-wider ${theme.textSoft}`}>{title}</span>
@@ -42,7 +42,7 @@ const Section = ({ title, children, defaultOpen = true, icon, theme }) => {
         </svg>
       </button>
       {open && (
-        <div className={`mt-3 backdrop-blur-xl border rounded-2xl p-5 ${theme.card}`}>
+        <div className={`mt-3 border rounded-2xl p-5 ${theme.card}`}>
           {children}
         </div>
       )}
@@ -121,12 +121,12 @@ const DatePicker = ({ label, value, onChange, theme }) => {
       {isOpen && (
         <>
           <div 
-            className="fixed inset-0 bg-black/10" 
-            style={{ zIndex: 9998 }} 
+            className="fixed inset-0"
+            style={{ zIndex: 9998, background: 'rgba(0,0,0,0.1)' }} 
             onClick={() => setIsOpen(false)} 
           />
           <div 
-            className={`fixed border rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}
+            className={`fixed rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900 border border-gray-700' : 'bg-white border border-gray-200'}`}
             style={{ top: coords.top, left: coords.left, zIndex: 9999 }}
           >
             <div className="flex items-center justify-between mb-4">
