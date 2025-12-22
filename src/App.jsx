@@ -31,7 +31,7 @@ const ThemeToggle = ({ dark, setDark }) => (
 const Section = ({ title, children, defaultOpen = true, icon, theme }) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="mb-4" style={{ position: 'relative', zIndex: 1 }}>
+    <div className="mb-4">
       <button onClick={() => setOpen(!open)} className={`w-full flex items-center justify-between px-5 py-4 backdrop-blur-xl border rounded-2xl transition-all duration-300 group ${theme.card} ${theme.cardHover}`}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-sm shadow-lg shadow-orange-500/20">{icon}</div>
@@ -42,8 +42,8 @@ const Section = ({ title, children, defaultOpen = true, icon, theme }) => {
         </svg>
       </button>
       {open && (
-        <div className="mt-3">
-          <div className={`backdrop-blur-xl border rounded-2xl p-5 ${theme.card}`}>{children}</div>
+        <div className={`mt-3 backdrop-blur-xl border rounded-2xl p-5 ${theme.card}`}>
+          {children}
         </div>
       )}
     </div>
@@ -60,7 +60,8 @@ const TextField = ({ label, value, onChange, placeholder, theme }) => (
 
 const DatePicker = ({ label, value, onChange, theme }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = React.useRef(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const triggerRef = React.useRef(null);
   const [viewYear, setViewYear] = useState(value ? new Date(value + 'T00:00:00').getFullYear() : new Date().getFullYear());
   const [viewMonth, setViewMonth] = useState(value ? new Date(value + 'T00:00:00').getMonth() : new Date().getMonth());
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -68,71 +69,95 @@ const DatePicker = ({ label, value, onChange, theme }) => {
   const getDays = (y, m) => new Date(y, m + 1, 0).getDate();
   const getFirst = (y, m) => new Date(y, m, 1).getDay();
   const dark = theme.dark;
-  
-  const handleSelect = (day) => {
+
+  const openCalendar = () => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setCoords({ top: rect.bottom + 8, left: rect.left });
+    }
+    setIsOpen(true);
+  };
+
+  const selectDate = (day) => {
     onChange(`${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
     setIsOpen(false);
   };
 
-  const handlePrevMonth = (e) => {
-    e.stopPropagation();
+  const prevMonth = () => {
     if (viewMonth === 0) {
-      setViewMonth(11);
       setViewYear(viewYear - 1);
+      setViewMonth(11);
     } else {
       setViewMonth(viewMonth - 1);
     }
   };
 
-  const handleNextMonth = (e) => {
-    e.stopPropagation();
+  const nextMonth = () => {
     if (viewMonth === 11) {
-      setViewMonth(0);
       setViewYear(viewYear + 1);
+      setViewMonth(0);
     } else {
       setViewMonth(viewMonth + 1);
     }
   };
 
   return (
-    <div className="mb-4" ref={containerRef} style={{ position: 'relative', zIndex: isOpen ? 100 : 1 }}>
+    <div className="mb-4">
       <label className={`block text-xs font-medium mb-2 uppercase tracking-wider ${theme.textMuted}`}>{label}</label>
-      <div className="relative">
-        <input type="text" value={formatDisplay(value)} readOnly onClick={() => setIsOpen(!isOpen)} placeholder="Select date"
-          className={`w-full px-4 py-3 text-sm border rounded-xl cursor-pointer focus:outline-none transition-all ${theme.input} ${theme.inputFocus}`} />
+      <div className="relative" ref={triggerRef}>
+        <input 
+          type="text" 
+          value={formatDisplay(value)} 
+          readOnly 
+          onClick={openCalendar} 
+          placeholder="Select date"
+          className={`w-full px-4 py-3 text-sm border rounded-xl cursor-pointer focus:outline-none transition-all ${theme.input} ${theme.inputFocus}`} 
+        />
         <svg className={`absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none ${theme.textMuted}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       </div>
+      
       {isOpen && (
         <>
-          <div className="fixed inset-0" style={{ zIndex: 98 }} onClick={() => setIsOpen(false)} />
           <div 
-            style={{ position: 'absolute', top: '100%', left: 0, marginTop: '8px', zIndex: 99 }}
-            className={`backdrop-blur-xl border rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900 border-white/10' : 'bg-white border-gray-200'}`}
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 bg-black/10" 
+            style={{ zIndex: 9998 }} 
+            onClick={() => setIsOpen(false)} 
+          />
+          <div 
+            className={`fixed border rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}
+            style={{ top: coords.top, left: coords.left, zIndex: 9999 }}
           >
             <div className="flex items-center justify-between mb-4">
-              <button type="button" onClick={handlePrevMonth} className={`p-2 rounded-lg transition-colors ${dark ? 'hover:bg-white/10 text-white/60' : 'hover:bg-gray-100 text-gray-600'}`}>
+              <button type="button" onClick={prevMonth} className={`p-2 rounded-lg transition-colors ${dark ? 'hover:bg-white/10 text-white/60' : 'hover:bg-gray-100 text-gray-600'}`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
               </button>
               <span className={`text-sm font-semibold ${dark ? 'text-white' : 'text-gray-900'}`}>{months[viewMonth]} {viewYear}</span>
-              <button type="button" onClick={handleNextMonth} className={`p-2 rounded-lg transition-colors ${dark ? 'hover:bg-white/10 text-white/60' : 'hover:bg-gray-100 text-gray-600'}`}>
+              <button type="button" onClick={nextMonth} className={`p-2 rounded-lg transition-colors ${dark ? 'hover:bg-white/10 text-white/60' : 'hover:bg-gray-100 text-gray-600'}`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
             </div>
             <div className="grid grid-cols-7 gap-1 mb-2">
-              {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => <div key={d} className={`w-8 h-8 text-xs flex items-center justify-center ${dark ? 'text-white/30' : 'text-gray-400'}`}>{d}</div>)}
+              {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+                <div key={d} className={`w-8 h-8 text-xs flex items-center justify-center ${dark ? 'text-white/30' : 'text-gray-400'}`}>{d}</div>
+              ))}
             </div>
             <div className="grid grid-cols-7 gap-1">
-              {Array(getFirst(viewYear, viewMonth)).fill(null).map((_, i) => <div key={`e-${i}`} className="w-8 h-8" />)}
-              {Array(getDays(viewYear, viewMonth)).fill(null).map((_, i) => {
+              {[...Array(getFirst(viewYear, viewMonth))].map((_, i) => (
+                <div key={`empty-${i}`} className="w-8 h-8" />
+              ))}
+              {[...Array(getDays(viewYear, viewMonth))].map((_, i) => {
                 const day = i + 1;
                 const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const isSelected = value === dateStr;
                 return (
-                  <button key={day} type="button" onClick={() => handleSelect(day)}
-                    className={`w-8 h-8 text-sm rounded-lg transition-all ${isSelected ? 'bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg' : dark ? 'text-white/70 hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}>
+                  <button 
+                    key={day} 
+                    type="button" 
+                    onClick={() => selectDate(day)}
+                    className={`w-8 h-8 text-sm rounded-lg transition-all ${isSelected ? 'bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg' : dark ? 'text-white/70 hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}
+                  >
                     {day}
                   </button>
                 );
