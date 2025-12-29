@@ -236,8 +236,13 @@ export default function App() {
   const loadSaved = (key, fallback) => {
     try {
       const saved = localStorage.getItem(`folio_${key}`);
-      return saved ? JSON.parse(saved) : fallback;
-    } catch { return fallback; }
+      if (saved === null || saved === undefined) return fallback;
+      const parsed = JSON.parse(saved);
+      return parsed !== null ? parsed : fallback;
+    } catch (e) { 
+      console.error(`Error loading ${key} from localStorage:`, e);
+      return fallback; 
+    }
   };
 
   const getInitialTab = () => {
@@ -336,7 +341,11 @@ export default function App() {
       customerSignatureName, customerTitle, terms, showExhibit1, showExhibit2
     };
     Object.entries(data).forEach(([key, value]) => {
-      try { localStorage.setItem(`folio_${key}`, JSON.stringify(value)); } catch {}
+      try { 
+        localStorage.setItem(`folio_${key}`, JSON.stringify(value)); 
+      } catch (e) {
+        console.error(`Error saving ${key} to localStorage:`, e);
+      }
     });
   }, [darkMode, templates, customerName, customerAddress, customerContact, customerEmail,
       billingSame, billingBillTo, billingAddress, billingContactName, billingEmail,
