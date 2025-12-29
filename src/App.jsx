@@ -171,7 +171,7 @@ const initialTiers = [
 
 const initialTerms = [
   { id: 'no-cost-usage', enabled: true, text: 'No Cost Usage period only applies up to {properties} property; clock starts Effective Date of the contract.', properties: '1', editing: false },
-  { id: 'integrated-package', enabled: true, text: 'Integrated Package includes access to Folio Buy & Folio Inventory.', editing: false },
+  { id: 'integrated-package', enabled: true, text: 'Integrated Package includes access to {products}.', editing: false },
   { id: 'production-access', enabled: true, text: 'Production access to commence on the Start date.', editing: false },
   { id: 'auto-renewal', enabled: true, text: 'To ensure no disruption to property operations at the end of the Initial Contract Term, Order Form will automatically convert to a Renewal Contract Term with the minimum usage as outlined within it in the event of non-communication. Written notice to terminate and cease conversion must be provided at least ten (10) days before the end of the then current Term to ops@folio.co.', editing: false },
   { id: 'terminate-convenience', enabled: true, text: 'At any point up to the above notice period, Customer may elect to terminate the Agreement for convenience without cost or penalty.', editing: false },
@@ -183,7 +183,7 @@ const initialTerms = [
 
 const ProductRow = ({ item, onUpdate, showDelete, onDelete, theme, showUnitDropdown }) => {
   const final = item.price && item.discount ? formatCurrency(calcDiscounted(item.price, item.discount)) : null;
-  const units = ['/property/mo', '/mo', '/mo/Active Property', '/year', '/property', ' (one-time)'];
+  const units = ['/property/mo', '/mo', '/year', '/property (one-time)'];
   return (
     <div className={`grid grid-cols-12 gap-3 items-center py-3 border-b transition-all duration-300 ${theme.dark ? 'border-white/5' : 'border-gray-100'} ${item.enabled !== undefined && !item.enabled ? 'opacity-40' : ''}`}>
       {item.enabled !== undefined && (
@@ -311,6 +311,18 @@ export default function App() {
   const [showExhibit1, setShowExhibit1] = useState(() => loadSaved('showExhibit1', true));
   const [showExhibit2, setShowExhibit2] = useState(() => loadSaved('showExhibit2', true));
 
+  const getTermDisplayText = (term) => {
+    let text = term.text;
+    if (text.includes('{products}')) {
+      const enabledProductNames = products.filter(p => p.enabled).map(p => p.name);
+      const productText = enabledProductNames.length > 0 
+        ? enabledProductNames.join(' & ') 
+        : '[select products in Order Form]';
+      text = text.replace('{products}', productText);
+    }
+    return text;
+  };
+
   const updateTerm = (id, updates) => {
     setTerms(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
   };
@@ -428,6 +440,13 @@ export default function App() {
     let text = term.text;
     if (term.properties) text = text.replace('{properties}', term.properties);
     if (term.waiverDate) text = text.replace('{waiverDate}', formatDate(term.waiverDate));
+    if (text.includes('{products}')) {
+      const enabledProductNames = products.filter(p => p.enabled).map(p => p.name);
+      const productText = enabledProductNames.length > 0 
+        ? enabledProductNames.join(' & ') 
+        : 'Folio Products';
+      text = text.replace('{products}', productText);
+    }
     return text;
   };
 
@@ -811,6 +830,8 @@ export default function App() {
                                 onClick={() => { const newDate = prompt('Enter date (YYYY-MM-DD):', term.waiverDate); if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) { updateTerm(term.id, { waiverDate: newDate }); } }}
                                 readOnly className={`w-32 px-2 py-0.5 mx-1 text-sm border rounded-lg text-center cursor-pointer focus:outline-none focus:border-orange-500/50 ${t.input}`} />
                               {term.text.split('{waiverDate}')[1]}</>
+                          ) : term.text.includes('{products}') ? (
+                            <span>{getTermDisplayText(term)}</span>
                           ) : term.text}
                         </p>
                       )}
