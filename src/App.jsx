@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const FolioLogo = ({ size = 'default' }) => {
   const boxSize = size === 'large' ? 'w-3.5 h-3.5' : 'w-2.5 h-2.5';
@@ -249,50 +249,57 @@ const ProductRow = ({ item, onUpdate, showDelete, onDelete, theme, showUnitDropd
 };
 
 export default function App() {
+  const loadSaved = (key, fallback) => {
+    try {
+      const saved = localStorage.getItem(`folio_${key}`);
+      return saved ? JSON.parse(saved) : fallback;
+    } catch { return fallback; }
+  };
+
   const getInitialTab = () => {
     const hash = window.location.hash.replace('#', '');
     return ['form', 'terms', 'templates'].includes(hash) ? hash : 'form';
   };
   
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => loadSaved('darkMode', false));
   const [view, setView] = useState('input');
   const [activeTab, setActiveTab] = useState(getInitialTab);
-  const [templates, setTemplates] = useState([]);
+  const [templates, setTemplates] = useState(() => loadSaved('templates', []));
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState('');
   
-  const [customerName, setCustomerName] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
-  const [customerAddressLine2, setCustomerAddressLine2] = useState('');
-  const [customerContact, setCustomerContact] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [billingSame, setBillingSame] = useState(false);
-  const [billingBillTo, setBillingBillTo] = useState('');
-  const [billingAddress, setBillingAddress] = useState('');
-  const [billingAddressLine2, setBillingAddressLine2] = useState('');
-  const [billingEmail, setBillingEmail] = useState('');
+  const [customerName, setCustomerName] = useState(() => loadSaved('customerName', ''));
+  const [customerAddress, setCustomerAddress] = useState(() => loadSaved('customerAddress', ''));
+  const [customerAddressLine2, setCustomerAddressLine2] = useState(() => loadSaved('customerAddressLine2', ''));
+  const [customerContact, setCustomerContact] = useState(() => loadSaved('customerContact', ''));
+  const [customerEmail, setCustomerEmail] = useState(() => loadSaved('customerEmail', ''));
+  const [billingSame, setBillingSame] = useState(() => loadSaved('billingSame', false));
+  const [billingBillTo, setBillingBillTo] = useState(() => loadSaved('billingBillTo', ''));
+  const [billingAddress, setBillingAddress] = useState(() => loadSaved('billingAddress', ''));
+  const [billingAddressLine2, setBillingAddressLine2] = useState(() => loadSaved('billingAddressLine2', ''));
+  const [billingEmail, setBillingEmail] = useState(() => loadSaved('billingEmail', ''));
   const getDefaultExpiry = (date) => {
     const d = new Date(date + 'T00:00:00');
     d.setDate(d.getDate() + 14);
     return d.toISOString().split('T')[0];
   };
-  const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
-  const [expiryDate, setExpiryDate] = useState(getDefaultExpiry(new Date().toISOString().split('T')[0]));
-  const [startDate, setStartDate] = useState('');
-  const [initialTerm, setInitialTerm] = useState('12 months');
-  const [renewalTerm, setRenewalTerm] = useState('1 year');
-  const [paymentTerms, setPaymentTerms] = useState('Net 30');
-  const [billingFrequency, setBillingFrequency] = useState('Monthly');
-  const [planName, setPlanName] = useState('');
-  const [planDescription, setPlanDescription] = useState('');
-  const [products, setProducts] = useState(initialProducts);
-  const [integrations, setIntegrations] = useState(initialIntegrations);
-  const [additionalFees, setAdditionalFees] = useState(initialFees);
-  const [customIntegrations, setCustomIntegrations] = useState([]);
-  const [customFees, setCustomFees] = useState([]);
-  const [minimumUsage, setMinimumUsage] = useState(initialTiers);
+  const [quoteDate, setQuoteDate] = useState(() => loadSaved('quoteDate', new Date().toISOString().split('T')[0]));
+  const [expiryDate, setExpiryDate] = useState(() => loadSaved('expiryDate', getDefaultExpiry(new Date().toISOString().split('T')[0])));
+  const [startDate, setStartDate] = useState(() => loadSaved('startDate', ''));
+  const [initialTerm, setInitialTerm] = useState(() => loadSaved('initialTerm', '12 months'));
+  const [renewalTerm, setRenewalTerm] = useState(() => loadSaved('renewalTerm', '1 year'));
+  const [paymentTerms, setPaymentTerms] = useState(() => loadSaved('paymentTerms', 'Net 30'));
+  const [billingFrequency, setBillingFrequency] = useState(() => loadSaved('billingFrequency', 'Monthly'));
+  const [planName, setPlanName] = useState(() => loadSaved('planName', ''));
+  const [planDescription, setPlanDescription] = useState(() => loadSaved('planDescription', ''));
+  const [products, setProducts] = useState(() => loadSaved('products', initialProducts));
+  const [integrations, setIntegrations] = useState(() => loadSaved('integrations', initialIntegrations));
+  const [additionalFees, setAdditionalFees] = useState(() => loadSaved('additionalFees', initialFees));
+  const [customIntegrations, setCustomIntegrations] = useState(() => loadSaved('customIntegrations', []));
+  const [customFees, setCustomFees] = useState(() => loadSaved('customFees', []));
+  const [minimumUsage, setMinimumUsage] = useState(() => loadSaved('minimumUsage', initialTiers));
   
-  const [terms, setTerms] = useState([
+  const [terms, setTerms] = useState(() => loadSaved('terms', [
     { id: 'no-cost-usage', enabled: true, text: 'No Cost Usage period only applies up to {properties} property; clock starts Effective Date of the contract.', properties: '1', editing: false },
     { id: 'integrated-package', enabled: true, text: 'Integrated Package includes access to Folio Buy & Folio Inventory.', editing: false },
     { id: 'production-access', enabled: true, text: 'Production access to commence on the Start date.', editing: false },
@@ -302,7 +309,7 @@ export default function App() {
     { id: 'active-property-30d', enabled: false, text: 'Active Property determined by 30D from the first order. A Property is Active for a minimum of 6 months (excluding the property covered by the Free Usage property). Property can be pre-paid at the start of each yearly renewal for a 10% discount.', editing: false },
     { id: 'manager-admin-fee', enabled: true, text: 'Manager Admin Fee billed at the beginning of the calendar year. Covers expenses associated with (1) nurturing, debugging, and maintaining connectivity to all other technological systems, (2) mirroring policies and adjusting processes in slight ways, as necessary to maintain continuous operations, (3) unlimited requests for reports, (4) 10 Manager access seats to configure suppliers and stores.', editing: false },
     { id: 'property-setup-waived', enabled: true, text: 'Property Setup Fee waived for any Active property live before {waiverDate}. This fee includes supplier mapping and onboarding, access to a training library, and virtual training sessions to ensure users are familiar with Folio.', waiverDate: '2026-12-01', editing: false },
-  ]);
+  ]));
 
   const updateTerm = (id, updates) => {
     setTerms(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
@@ -323,6 +330,25 @@ export default function App() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  useEffect(() => {
+    const data = {
+      darkMode, templates, customerName, customerAddress, customerAddressLine2,
+      customerContact, customerEmail, billingSame, billingBillTo, billingAddress,
+      billingAddressLine2, billingEmail, quoteDate, expiryDate, startDate,
+      initialTerm, renewalTerm, paymentTerms, billingFrequency, planName,
+      planDescription, products, integrations, additionalFees, customIntegrations,
+      customFees, minimumUsage, terms
+    };
+    Object.entries(data).forEach(([key, value]) => {
+      try { localStorage.setItem(`folio_${key}`, JSON.stringify(value)); } catch {}
+    });
+  }, [darkMode, templates, customerName, customerAddress, customerAddressLine2,
+      customerContact, customerEmail, billingSame, billingBillTo, billingAddress,
+      billingAddressLine2, billingEmail, quoteDate, expiryDate, startDate,
+      initialTerm, renewalTerm, paymentTerms, billingFrequency, planName,
+      planDescription, products, integrations, additionalFees, customIntegrations,
+      customFees, minimumUsage, terms]);
 
   const t = darkMode ? {
     dark: true,
