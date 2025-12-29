@@ -58,6 +58,14 @@ const TextField = ({ label, value, onChange, placeholder, theme }) => (
   </div>
 );
 
+const TextArea = ({ label, value, onChange, placeholder, theme, rows = 3 }) => (
+  <div className="mb-4 group">
+    <label className={`block text-xs font-medium mb-2 uppercase tracking-wider group-focus-within:text-orange-400 transition-colors ${theme.textMuted}`}>{label}</label>
+    <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows}
+      className={`w-full px-4 py-3 text-sm border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 resize-none ${theme.input} ${theme.inputFocus}`} />
+  </div>
+);
+
 const DatePicker = ({ label, value, onChange, theme }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
@@ -83,52 +91,23 @@ const DatePicker = ({ label, value, onChange, theme }) => {
     setIsOpen(false);
   };
 
-  const prevMonth = () => {
-    if (viewMonth === 0) {
-      setViewYear(viewYear - 1);
-      setViewMonth(11);
-    } else {
-      setViewMonth(viewMonth - 1);
-    }
-  };
-
-  const nextMonth = () => {
-    if (viewMonth === 11) {
-      setViewYear(viewYear + 1);
-      setViewMonth(0);
-    } else {
-      setViewMonth(viewMonth + 1);
-    }
-  };
+  const prevMonth = () => { if (viewMonth === 0) { setViewYear(viewYear - 1); setViewMonth(11); } else { setViewMonth(viewMonth - 1); } };
+  const nextMonth = () => { if (viewMonth === 11) { setViewYear(viewYear + 1); setViewMonth(0); } else { setViewMonth(viewMonth + 1); } };
 
   return (
     <div className="mb-4">
       <label className={`block text-xs font-medium mb-2 uppercase tracking-wider ${theme.textMuted}`}>{label}</label>
       <div className="relative" ref={triggerRef}>
-        <input 
-          type="text" 
-          value={formatDisplay(value)} 
-          readOnly 
-          onClick={openCalendar} 
-          placeholder="Select date"
-          className={`w-full px-4 py-3 text-sm border rounded-xl cursor-pointer focus:outline-none transition-all ${theme.input} ${theme.inputFocus}`} 
-        />
+        <input type="text" value={formatDisplay(value)} readOnly onClick={openCalendar} placeholder="Select date"
+          className={`w-full px-4 py-3 text-sm border rounded-xl cursor-pointer focus:outline-none transition-all ${theme.input} ${theme.inputFocus}`} />
         <svg className={`absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none ${theme.textMuted}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       </div>
-      
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0"
-            style={{ zIndex: 9998, background: 'rgba(0,0,0,0.1)' }} 
-            onClick={() => setIsOpen(false)} 
-          />
-          <div 
-            className={`fixed rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900 border border-gray-700' : 'bg-white border border-gray-200'}`}
-            style={{ top: coords.top, left: coords.left, zIndex: 9999 }}
-          >
+          <div className="fixed inset-0" style={{ zIndex: 9998, background: 'rgba(0,0,0,0.1)' }} onClick={() => setIsOpen(false)} />
+          <div className={`fixed rounded-2xl shadow-2xl p-4 w-72 ${dark ? 'bg-gray-900 border border-gray-700' : 'bg-white border border-gray-200'}`} style={{ top: coords.top, left: coords.left, zIndex: 9999 }}>
             <div className="flex items-center justify-between mb-4">
               <button type="button" onClick={prevMonth} className={`p-2 rounded-lg transition-colors ${dark ? 'hover:bg-white/10 text-white/60' : 'hover:bg-gray-100 text-gray-600'}`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
@@ -144,20 +123,14 @@ const DatePicker = ({ label, value, onChange, theme }) => {
               ))}
             </div>
             <div className="grid grid-cols-7 gap-1">
-              {[...Array(getFirst(viewYear, viewMonth))].map((_, i) => (
-                <div key={`empty-${i}`} className="w-8 h-8" />
-              ))}
+              {[...Array(getFirst(viewYear, viewMonth))].map((_, i) => <div key={`empty-${i}`} className="w-8 h-8" />)}
               {[...Array(getDays(viewYear, viewMonth))].map((_, i) => {
                 const day = i + 1;
                 const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const isSelected = value === dateStr;
                 return (
-                  <button 
-                    key={day} 
-                    type="button" 
-                    onClick={() => selectDate(day)}
-                    className={`w-8 h-8 text-sm rounded-lg transition-all ${isSelected ? 'bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg' : dark ? 'text-white/70 hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}
-                  >
+                  <button key={day} type="button" onClick={() => selectDate(day)}
+                    className={`w-8 h-8 text-sm rounded-lg transition-all ${isSelected ? 'bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg' : dark ? 'text-white/70 hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}>
                     {day}
                   </button>
                 );
@@ -183,6 +156,7 @@ const initialProducts = [
 const initialIntegrations = [
   { id: 'meez', name: 'Meez Recipe Management', price: '', unit: '/property/mo', discount: '', enabled: false },
   { id: 'sage', name: 'Sage Integration', price: '', unit: '/property/mo', discount: '', enabled: false },
+  { id: 'workday', name: 'Standard Workday Integration', price: '', unit: '/mo/Active Property', discount: '', enabled: false },
 ];
 
 const initialFees = [
@@ -191,15 +165,25 @@ const initialFees = [
 ];
 
 const initialTiers = [
-  { id: 'tier1', startMonth: '1', endMonth: '4', amount: '', note: '' },
-  { id: 'tier2', startMonth: '5', endMonth: '9', amount: '', note: '' },
-  { id: 'tier3', startMonth: '10', endMonth: '12', amount: '', note: '' },
-  { id: 'tier4', startMonth: '13', endMonth: '', amount: '', note: '' },
+  { id: 'tier1', startMonth: '1', endMonth: '12', amount: '', note: '' },
+  { id: 'tier2', startMonth: '13', endMonth: '24', amount: '', note: '' },
+];
+
+const initialTerms = [
+  { id: 'no-cost-usage', enabled: true, text: 'No Cost Usage period only applies up to {properties} property; clock starts Effective Date of the contract.', properties: '1', editing: false },
+  { id: 'integrated-package', enabled: true, text: 'Integrated Package includes access to Folio Buy & Folio Inventory.', editing: false },
+  { id: 'production-access', enabled: true, text: 'Production access to commence on the Start date.', editing: false },
+  { id: 'auto-renewal', enabled: true, text: 'To ensure no disruption to property operations at the end of the Initial Contract Term, Order Form will automatically convert to a Renewal Contract Term with the minimum usage as outlined within it in the event of non-communication. Written notice to terminate and cease conversion must be provided at least ten (10) days before the end of the then current Term to ops@folio.co.', editing: false },
+  { id: 'terminate-convenience', enabled: true, text: 'At any point up to the above notice period, Customer may elect to terminate the Agreement for convenience without cost or penalty.', editing: false },
+  { id: 'active-property-def', enabled: true, text: 'Active Property determined by Folio, maintaining access to Customer users after the set Go-Live date.', editing: false },
+  { id: 'active-property-30d', enabled: false, text: 'Active Property determined by 30D from the first order. A Property is Active for a minimum of 6 months (excluding the property covered by the Free Usage property). Property can be pre-paid at the start of each yearly renewal for a 10% discount.', editing: false },
+  { id: 'manager-admin-fee', enabled: true, text: 'Manager Admin Fee billed at the beginning of the calendar year. Covers expenses associated with (1) nurturing, debugging, and maintaining connectivity to all other technological systems, (2) mirroring policies and adjusting processes in slight ways, as necessary to maintain continuous operations, (3) unlimited requests for reports, (4) 10 Manager access seats to configure suppliers and stores.', editing: false },
+  { id: 'property-setup-waived', enabled: true, text: 'Property Setup Fee waived for any Active property live before {waiverDate}. This fee includes supplier mapping and onboarding, access to a training library, and virtual training sessions to ensure users are familiar with Folio.', waiverDate: '2026-12-01', editing: false },
 ];
 
 const ProductRow = ({ item, onUpdate, showDelete, onDelete, theme, showUnitDropdown }) => {
   const final = item.price && item.discount ? formatCurrency(calcDiscounted(item.price, item.discount)) : null;
-  const units = ['/property/mo', '/mo', '/year', '/property', ' (one-time)'];
+  const units = ['/property/mo', '/mo', '/mo/Active Property', '/year', '/property', ' (one-time)'];
   return (
     <div className={`grid grid-cols-12 gap-3 items-center py-3 border-b transition-all duration-300 ${theme.dark ? 'border-white/5' : 'border-gray-100'} ${item.enabled !== undefined && !item.enabled ? 'opacity-40' : ''}`}>
       {item.enabled !== undefined && (
@@ -260,7 +244,13 @@ export default function App() {
     const hash = window.location.hash.replace('#', '');
     return ['form', 'terms', 'templates'].includes(hash) ? hash : 'form';
   };
-  
+
+  const getDefaultExpiry = (date) => {
+    const d = new Date(date + 'T00:00:00');
+    d.setDate(d.getDate() + 14);
+    return d.toISOString().split('T')[0];
+  };
+
   const [darkMode, setDarkMode] = useState(() => loadSaved('darkMode', false));
   const [view, setView] = useState('input');
   const [activeTab, setActiveTab] = useState(getInitialTab);
@@ -268,21 +258,20 @@ export default function App() {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState('');
   
+  // Customer Info
   const [customerName, setCustomerName] = useState(() => loadSaved('customerName', ''));
   const [customerAddress, setCustomerAddress] = useState(() => loadSaved('customerAddress', ''));
-  const [customerAddressLine2, setCustomerAddressLine2] = useState(() => loadSaved('customerAddressLine2', ''));
   const [customerContact, setCustomerContact] = useState(() => loadSaved('customerContact', ''));
   const [customerEmail, setCustomerEmail] = useState(() => loadSaved('customerEmail', ''));
+  
+  // Billing Info
   const [billingSame, setBillingSame] = useState(() => loadSaved('billingSame', false));
   const [billingBillTo, setBillingBillTo] = useState(() => loadSaved('billingBillTo', ''));
   const [billingAddress, setBillingAddress] = useState(() => loadSaved('billingAddress', ''));
-  const [billingAddressLine2, setBillingAddressLine2] = useState(() => loadSaved('billingAddressLine2', ''));
+  const [billingContactName, setBillingContactName] = useState(() => loadSaved('billingContactName', ''));
   const [billingEmail, setBillingEmail] = useState(() => loadSaved('billingEmail', ''));
-  const getDefaultExpiry = (date) => {
-    const d = new Date(date + 'T00:00:00');
-    d.setDate(d.getDate() + 14);
-    return d.toISOString().split('T')[0];
-  };
+  
+  // Quote & Contract
   const [quoteDate, setQuoteDate] = useState(() => loadSaved('quoteDate', new Date().toISOString().split('T')[0]));
   const [expiryDate, setExpiryDate] = useState(() => loadSaved('expiryDate', getDefaultExpiry(new Date().toISOString().split('T')[0])));
   const [startDate, setStartDate] = useState(() => loadSaved('startDate', ''));
@@ -290,26 +279,32 @@ export default function App() {
   const [renewalTerm, setRenewalTerm] = useState(() => loadSaved('renewalTerm', '1 year'));
   const [paymentTerms, setPaymentTerms] = useState(() => loadSaved('paymentTerms', 'Net 30'));
   const [billingFrequency, setBillingFrequency] = useState(() => loadSaved('billingFrequency', 'Monthly'));
+  
+  // Package
   const [planName, setPlanName] = useState(() => loadSaved('planName', ''));
-  const [planDescription, setPlanDescription] = useState(() => loadSaved('planDescription', ''));
+  const [freeUsage, setFreeUsage] = useState(() => loadSaved('freeUsage', ''));
+  const [servicesRef, setServicesRef] = useState(() => loadSaved('servicesRef', 'Detailed in Exhibit 1'));
+  
+  // Products & Fees
   const [products, setProducts] = useState(() => loadSaved('products', initialProducts));
+  const [monthlyFeeDescription, setMonthlyFeeDescription] = useState(() => loadSaved('monthlyFeeDescription', '$150/property/mo per Active Property'));
+  const [optionalAddons, setOptionalAddons] = useState(() => loadSaved('optionalAddons', ''));
   const [integrations, setIntegrations] = useState(() => loadSaved('integrations', initialIntegrations));
   const [additionalFees, setAdditionalFees] = useState(() => loadSaved('additionalFees', initialFees));
   const [customIntegrations, setCustomIntegrations] = useState(() => loadSaved('customIntegrations', []));
   const [customFees, setCustomFees] = useState(() => loadSaved('customFees', []));
   const [minimumUsage, setMinimumUsage] = useState(() => loadSaved('minimumUsage', initialTiers));
   
-  const [terms, setTerms] = useState(() => loadSaved('terms', [
-    { id: 'no-cost-usage', enabled: true, text: 'No Cost Usage period only applies up to {properties} property; clock starts Effective Date of the contract.', properties: '1', editing: false },
-    { id: 'integrated-package', enabled: true, text: 'Integrated Package includes access to Folio Buy & Folio Inventory.', editing: false },
-    { id: 'production-access', enabled: true, text: 'Production access to commence on the Start date.', editing: false },
-    { id: 'auto-renewal', enabled: true, text: 'To ensure no disruption to property operations at the end of the Initial Contract Term, Order Form will automatically convert to a Renewal Contract Term with the minimum usage as outlined within it in the event of non-communication. Written notice to terminate and cease conversion must be provided at least ten (10) days before the end of the then current Term to ops@folio.co.', editing: false },
-    { id: 'terminate-convenience', enabled: true, text: 'At any point up to the above notice period, Customer may elect to terminate the Agreement for convenience without cost or penalty.', editing: false },
-    { id: 'active-property-def', enabled: true, text: 'Active Property determined by Folio, maintaining access to Customer users after the set Go-Live date.', editing: false },
-    { id: 'active-property-30d', enabled: false, text: 'Active Property determined by 30D from the first order. A Property is Active for a minimum of 6 months (excluding the property covered by the Free Usage property). Property can be pre-paid at the start of each yearly renewal for a 10% discount.', editing: false },
-    { id: 'manager-admin-fee', enabled: true, text: 'Manager Admin Fee billed at the beginning of the calendar year. Covers expenses associated with (1) nurturing, debugging, and maintaining connectivity to all other technological systems, (2) mirroring policies and adjusting processes in slight ways, as necessary to maintain continuous operations, (3) unlimited requests for reports, (4) 10 Manager access seats to configure suppliers and stores.', editing: false },
-    { id: 'property-setup-waived', enabled: true, text: 'Property Setup Fee waived for any Active property live before {waiverDate}. This fee includes supplier mapping and onboarding, access to a training library, and virtual training sessions to ensure users are familiar with Folio.', waiverDate: '2026-12-01', editing: false },
-  ]));
+  // Signature
+  const [customerSignatureName, setCustomerSignatureName] = useState(() => loadSaved('customerSignatureName', ''));
+  const [customerTitle, setCustomerTitle] = useState(() => loadSaved('customerTitle', ''));
+  
+  // Terms
+  const [terms, setTerms] = useState(() => loadSaved('terms', initialTerms));
+  
+  // Exhibits
+  const [showExhibit1, setShowExhibit1] = useState(() => loadSaved('showExhibit1', true));
+  const [showExhibit2, setShowExhibit2] = useState(() => loadSaved('showExhibit2', true));
 
   const updateTerm = (id, updates) => {
     setTerms(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
@@ -320,7 +315,7 @@ export default function App() {
     window.location.hash = tab;
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
       if (['form', 'terms', 'templates'].includes(hash)) {
@@ -333,43 +328,35 @@ export default function App() {
 
   useEffect(() => {
     const data = {
-      darkMode, templates, customerName, customerAddress, customerAddressLine2,
-      customerContact, customerEmail, billingSame, billingBillTo, billingAddress,
-      billingAddressLine2, billingEmail, quoteDate, expiryDate, startDate,
-      initialTerm, renewalTerm, paymentTerms, billingFrequency, planName,
-      planDescription, products, integrations, additionalFees, customIntegrations,
-      customFees, minimumUsage, terms
+      darkMode, templates, customerName, customerAddress, customerContact, customerEmail,
+      billingSame, billingBillTo, billingAddress, billingContactName, billingEmail,
+      quoteDate, expiryDate, startDate, initialTerm, renewalTerm, paymentTerms, billingFrequency,
+      planName, freeUsage, servicesRef, products, monthlyFeeDescription, optionalAddons,
+      integrations, additionalFees, customIntegrations, customFees, minimumUsage,
+      customerSignatureName, customerTitle, terms, showExhibit1, showExhibit2
     };
     Object.entries(data).forEach(([key, value]) => {
       try { localStorage.setItem(`folio_${key}`, JSON.stringify(value)); } catch {}
     });
-  }, [darkMode, templates, customerName, customerAddress, customerAddressLine2,
-      customerContact, customerEmail, billingSame, billingBillTo, billingAddress,
-      billingAddressLine2, billingEmail, quoteDate, expiryDate, startDate,
-      initialTerm, renewalTerm, paymentTerms, billingFrequency, planName,
-      planDescription, products, integrations, additionalFees, customIntegrations,
-      customFees, minimumUsage, terms]);
+  }, [darkMode, templates, customerName, customerAddress, customerContact, customerEmail,
+      billingSame, billingBillTo, billingAddress, billingContactName, billingEmail,
+      quoteDate, expiryDate, startDate, initialTerm, renewalTerm, paymentTerms, billingFrequency,
+      planName, freeUsage, servicesRef, products, monthlyFeeDescription, optionalAddons,
+      integrations, additionalFees, customIntegrations, customFees, minimumUsage,
+      customerSignatureName, customerTitle, terms, showExhibit1, showExhibit2]);
 
   const t = darkMode ? {
-    dark: true,
-    bg: 'bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950',
-    glow: 'from-orange-500/10',
-    header: 'bg-gray-950/80 border-white/5',
-    text: 'text-white', textMuted: 'text-white/40', textSoft: 'text-white/70',
+    dark: true, bg: 'bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950', glow: 'from-orange-500/10',
+    header: 'bg-gray-950/80 border-white/5', text: 'text-white', textMuted: 'text-white/40', textSoft: 'text-white/70',
     card: 'bg-white/5 border-white/10', cardHover: 'hover:bg-white/10',
     input: 'bg-white/5 border-white/10 text-white placeholder-white/20',
-    inputFocus: 'focus:border-orange-500/50 focus:ring-orange-500/20',
-    select: 'bg-gray-900',
+    inputFocus: 'focus:border-orange-500/50 focus:ring-orange-500/20', select: 'bg-gray-900',
   } : {
-    dark: false,
-    bg: 'bg-gradient-to-br from-gray-50 via-white to-gray-100',
-    glow: 'from-orange-500/5',
-    header: 'bg-white/80 border-gray-200',
-    text: 'text-gray-900', textMuted: 'text-gray-400', textSoft: 'text-gray-600',
+    dark: false, bg: 'bg-gradient-to-br from-gray-50 via-white to-gray-100', glow: 'from-orange-500/5',
+    header: 'bg-white/80 border-gray-200', text: 'text-gray-900', textMuted: 'text-gray-400', textSoft: 'text-gray-600',
     card: 'bg-white border-gray-200 shadow-sm', cardHover: 'hover:shadow-md',
     input: 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400',
-    inputFocus: 'focus:border-orange-500 focus:ring-orange-500/20',
-    select: 'bg-white',
+    inputFocus: 'focus:border-orange-500 focus:ring-orange-500/20', select: 'bg-white',
   };
 
   const handleBillingSame = (checked) => {
@@ -377,20 +364,24 @@ export default function App() {
     if (checked) {
       setBillingBillTo(customerContact);
       setBillingAddress(customerAddress);
-      setBillingAddressLine2(customerAddressLine2);
+      setBillingContactName(customerContact);
       setBillingEmail(customerEmail);
+      setCustomerSignatureName(customerContact);
     }
   };
 
   const clearAll = () => {
     if (window.confirm('Clear all form data?')) {
-      setCustomerName(''); setCustomerAddress(''); setCustomerAddressLine2(''); setCustomerContact(''); setCustomerEmail('');
-      setBillingSame(false); setBillingBillTo(''); setBillingAddress(''); setBillingAddressLine2(''); setBillingEmail('');
+      setCustomerName(''); setCustomerAddress(''); setCustomerContact(''); setCustomerEmail('');
+      setBillingSame(false); setBillingBillTo(''); setBillingAddress(''); setBillingContactName(''); setBillingEmail('');
       setQuoteDate(new Date().toISOString().split('T')[0]); setExpiryDate(getDefaultExpiry(new Date().toISOString().split('T')[0])); setStartDate('');
       setInitialTerm('12 months'); setRenewalTerm('1 year'); setPaymentTerms('Net 30'); setBillingFrequency('Monthly');
-      setPlanName(''); setPlanDescription('');
-      setProducts(initialProducts); setIntegrations(initialIntegrations); setAdditionalFees(initialFees);
+      setPlanName(''); setFreeUsage(''); setServicesRef('Detailed in Exhibit 1');
+      setProducts(initialProducts); setMonthlyFeeDescription('$150/property/mo per Active Property'); setOptionalAddons('');
+      setIntegrations(initialIntegrations); setAdditionalFees(initialFees);
       setCustomIntegrations([]); setCustomFees([]); setMinimumUsage(initialTiers);
+      setCustomerSignatureName(''); setCustomerTitle('');
+      setTerms(initialTerms); setShowExhibit1(true); setShowExhibit2(true);
     }
   };
 
@@ -398,7 +389,9 @@ export default function App() {
     if (!newTemplateName.trim()) return;
     setTemplates(prev => [...prev, {
       id: `t-${Date.now()}`, name: newTemplateName.trim(), createdAt: new Date().toISOString(),
-      data: { initialTerm, renewalTerm, paymentTerms, billingFrequency, planName, planDescription, products, integrations, additionalFees, customIntegrations, customFees, minimumUsage, terms }
+      data: { initialTerm, renewalTerm, paymentTerms, billingFrequency, planName, freeUsage, servicesRef,
+        products, monthlyFeeDescription, optionalAddons, integrations, additionalFees, customIntegrations,
+        customFees, minimumUsage, terms, showExhibit1, showExhibit2 }
     }]);
     setNewTemplateName(''); setShowTemplateModal(false);
   };
@@ -406,36 +399,39 @@ export default function App() {
   const loadTemplate = (tmpl) => {
     const d = tmpl.data;
     setInitialTerm(d.initialTerm); setRenewalTerm(d.renewalTerm); setPaymentTerms(d.paymentTerms);
-    setBillingFrequency(d.billingFrequency); setPlanName(d.planName); setPlanDescription(d.planDescription);
-    setProducts(d.products); setIntegrations(d.integrations); setAdditionalFees(d.additionalFees);
+    setBillingFrequency(d.billingFrequency); setPlanName(d.planName);
+    if (d.freeUsage !== undefined) setFreeUsage(d.freeUsage);
+    if (d.servicesRef !== undefined) setServicesRef(d.servicesRef);
+    setProducts(d.products); 
+    if (d.monthlyFeeDescription !== undefined) setMonthlyFeeDescription(d.monthlyFeeDescription);
+    if (d.optionalAddons !== undefined) setOptionalAddons(d.optionalAddons);
+    setIntegrations(d.integrations); setAdditionalFees(d.additionalFees);
     setCustomIntegrations(d.customIntegrations); setCustomFees(d.customFees); setMinimumUsage(d.minimumUsage);
     if (d.terms) setTerms(d.terms);
-    setActiveTab('form');
-    window.location.hash = 'form';
+    if (d.showExhibit1 !== undefined) setShowExhibit1(d.showExhibit1);
+    if (d.showExhibit2 !== undefined) setShowExhibit2(d.showExhibit2);
+    changeTab('form');
   };
 
   const formatDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
 
+  const renderTermText = (term) => {
+    let text = term.text;
+    if (term.properties) text = text.replace('{properties}', term.properties);
+    if (term.waiverDate) text = text.replace('{waiverDate}', formatDate(term.waiverDate));
+    return text;
+  };
+
+  // Preview/Generated Form
   if (view === 'preview') {
     const enabledProducts = products.filter(p => p.enabled);
     const enabledIntegrations = [...integrations.filter(p => p.enabled), ...customIntegrations.filter(p => p.name)];
     const enabledFees = [...additionalFees.filter(p => p.enabled), ...customFees.filter(p => p.name)];
     const enabledTerms = terms.filter(t => t.enabled);
 
-    const renderTermText = (term) => {
-      let text = term.text;
-      if (term.properties) {
-        text = text.replace('{properties}', term.properties);
-      }
-      if (term.waiverDate) {
-        text = text.replace('{waiverDate}', new Date(term.waiverDate + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
-      }
-      return text;
-    };
-
     const TableRow = ({ label, value, isLast }) => (
       <div className={`flex ${!isLast ? 'border-b border-gray-200' : ''}`}>
-        <div className="w-40 flex-shrink-0 py-3 px-4 border-r border-gray-200 flex items-start">
+        <div className="w-44 flex-shrink-0 py-3 px-4 border-r border-gray-200 flex items-start">
           <span className="text-orange-500 mr-2">●</span>
           <span className="font-semibold text-gray-700 text-sm">{label}</span>
         </div>
@@ -450,13 +446,22 @@ export default function App() {
         <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
           <h2 className="text-sm font-bold text-orange-500 uppercase tracking-wide">{title}</h2>
         </div>
-        <div>
-          {rows.map((row, i) => (
-            <TableRow key={row.label} label={row.label} value={row.value} isLast={i === rows.length - 1} />
-          ))}
-        </div>
+        <div>{rows.map((row, i) => <TableRow key={row.label} label={row.label} value={row.value} isLast={i === rows.length - 1} />)}</div>
       </div>
     );
+
+    const formatPriceWithDiscount = (item) => {
+      if (item.discount && parseFloat(item.discount) > 0) {
+        const final = calcDiscounted(item.price, item.discount);
+        return (
+          <span>
+            {formatCurrency(final)}{item.unit} <span className="line-through text-gray-400">{formatCurrency(item.price)}</span>
+            <span className="ml-2 text-gray-500">{item.discount}% discount</span>
+          </span>
+        );
+      }
+      return `${formatCurrency(item.price)}${item.unit}`;
+    };
 
     return (
       <div className="bg-white min-h-screen">
@@ -484,103 +489,123 @@ export default function App() {
 
           <h1 className="text-3xl font-light text-center text-gray-800 mb-3">Folio Order Form</h1>
           <p className="text-center text-sm text-gray-500 mb-10">
-            Quote date: {formatDate(quoteDate)} | <span className="underline">Quote expiry:</span> {formatDate(expiryDate)}
+            Quote date: {formatDate(quoteDate)} | <span className="font-medium">Quote expiry:</span> {formatDate(expiryDate)}
           </p>
 
-          <SectionTable 
-            title="Customer Information" 
-            rows={[
-              { label: 'Customer:', value: customerName },
-              { label: 'Address:', value: `${customerAddress}\n${customerAddressLine2}` },
-              { label: 'Contact name:', value: customerContact },
-              { label: 'Contact email:', value: customerEmail },
-            ]} 
-          />
+          <SectionTable title="Customer Information" rows={[
+            { label: 'Customer:', value: customerName },
+            { label: 'Address:', value: customerAddress },
+            { label: 'Contact name:', value: customerContact },
+            { label: 'Contact email:', value: customerEmail },
+          ]} />
 
-          <SectionTable 
-            title="Billing Contact Information" 
-            rows={[
-              { label: 'Bill To:', value: billingBillTo },
-              { label: 'Billing Address:', value: `${billingAddress}\n${billingAddressLine2}` },
-              { label: 'Invoice Email:', value: billingEmail },
-            ]} 
-          />
+          <SectionTable title="Billing Contact Information" rows={[
+            { label: 'Bill To:', value: billingBillTo },
+            { label: 'Billing Address:', value: billingAddress },
+            { label: 'Billing Contact Name:', value: billingContactName },
+            { label: 'Invoice Email:', value: billingEmail },
+          ]} />
 
-          {(planName || planDescription) && (
-            <SectionTable 
-              title="Package" 
-              rows={[
-                { label: 'Plan:', value: `${planName}\n${planDescription}` },
-              ]} 
-            />
+          {(planName || freeUsage) && (
+            <>
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">Folio Platform Access</h2>
+              <SectionTable title="Folio Package" rows={[
+                ...(planName ? [{ label: 'Plan:', value: planName }] : []),
+                ...(freeUsage ? [{ label: 'Free Usage:', value: freeUsage }] : []),
+                ...(servicesRef ? [{ label: 'Services:', value: servicesRef }] : []),
+              ]} />
+            </>
           )}
 
-          <SectionTable 
-            title="Contract Terms" 
-            rows={[
-              { label: 'Start Date:', value: formatDate(startDate) },
-              { label: 'Initial Contract Term:', value: initialTerm },
-              { label: 'Renewal Contract Term:', value: renewalTerm },
-              { label: 'Payment Terms:', value: paymentTerms },
-              { label: 'Billing Frequency:', value: billingFrequency },
-            ]} 
-          />
+          <SectionTable title="Contract Terms" rows={[
+            { label: 'Start Date:', value: formatDate(startDate) },
+            { label: 'Initial Contract Term:', value: initialTerm },
+            { label: 'Renewal Contract Term:', value: renewalTerm },
+            { label: 'Payment Terms:', value: paymentTerms },
+            { label: 'Billing Frequency:', value: billingFrequency },
+          ]} />
 
           {enabledProducts.length > 0 && (
-            <SectionTable 
-              title="Product Fees" 
-              rows={enabledProducts.map(p => ({
-                label: `${p.name}:`,
-                value: p.discount 
-                  ? `${formatCurrency(calcDiscounted(p.price, p.discount))}${p.unit}  (${p.discount}% discount from ${formatCurrency(p.price)})`
-                  : `${formatCurrency(p.price)}${p.unit}`
-              }))} 
-            />
+            <>
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">Product Fees</h2>
+              <div className="border border-gray-200 rounded-lg mb-6 overflow-hidden">
+                <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
+                  <h2 className="text-sm font-bold text-orange-500 uppercase tracking-wide">
+                    {enabledProducts.map(p => p.name).join(' & ')}
+                  </h2>
+                </div>
+                <div className="p-4 space-y-2 text-sm text-gray-600">
+                  {monthlyFeeDescription && (
+                    <div className="flex">
+                      <span className="text-orange-500 mr-2">●</span>
+                      <span><strong>Monthly fees:</strong> {monthlyFeeDescription}</span>
+                    </div>
+                  )}
+                  {minimumUsage.filter(t => t.amount).length > 0 && (
+                    <div className="flex">
+                      <span className="text-orange-500 mr-2">●</span>
+                      <div>
+                        <strong>Minimum usage:</strong>
+                        <div className="ml-4 mt-1 space-y-1">
+                          {minimumUsage.filter(t => t.amount).map(tier => (
+                            <div key={tier.id}>
+                              Months {tier.startMonth}-{tier.endMonth || '+'}: <strong>{formatCurrency(tier.amount)}/mo</strong>
+                              {tier.note && <span className="text-gray-500"> ({tier.note})</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {servicesRef && (
+                    <div className="flex">
+                      <span className="text-orange-500 mr-2">●</span>
+                      <span><strong>Services:</strong> {servicesRef}</span>
+                    </div>
+                  )}
+                  {optionalAddons && (
+                    <div className="flex">
+                      <span className="text-orange-500 mr-2">●</span>
+                      <span><strong><em>Optional:</em></strong> {optionalAddons}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
           )}
 
-          {enabledIntegrations.length > 0 && (
-            <SectionTable 
-              title="Integrations" 
-              rows={enabledIntegrations.map(p => ({
-                label: `${p.name}:`,
-                value: p.discount 
-                  ? `${formatCurrency(calcDiscounted(p.price, p.discount))}${p.unit}  (${p.discount}% discount from ${formatCurrency(p.price)})`
-                  : `${formatCurrency(p.price)}${p.unit}`
-              }))} 
-            />
-          )}
-
-          {enabledFees.length > 0 && (
-            <SectionTable 
-              title="Additional Fees" 
-              rows={enabledFees.map(p => ({
-                label: `${p.name}:`,
-                value: p.discount 
-                  ? `${formatCurrency(calcDiscounted(p.price, p.discount))}${p.unit}  (${p.discount}% discount from ${formatCurrency(p.price)})`
-                  : `${formatCurrency(p.price)}${p.unit}`
-              }))} 
-            />
-          )}
-
-          {minimumUsage.filter(t => t.amount).length > 0 && (
-            <SectionTable 
-              title="Minimum Usage" 
-              rows={minimumUsage.filter(t => t.amount).map(t => ({
-                label: t.endMonth ? `Months ${t.startMonth}-${t.endMonth}:` : `Months ${t.startMonth}+:`,
-                value: `${formatCurrency(t.amount)}/mo${t.note ? `\n(${t.note})` : ''}`
-              }))} 
-            />
+          {(enabledIntegrations.length > 0 || enabledFees.length > 0) && (
+            <div className="border border-gray-200 rounded-lg mb-6 overflow-hidden">
+              <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
+                <h2 className="text-sm font-bold text-orange-500 uppercase tracking-wide">Additional Fees</h2>
+              </div>
+              <table className="w-full text-sm">
+                <tbody>
+                  {enabledIntegrations.map(item => (
+                    <tr key={item.id || item.name} className="border-b border-gray-100">
+                      <td className="py-3 px-4 font-medium text-gray-700">{item.name}</td>
+                      <td className="py-3 px-4 text-gray-500">Monthly</td>
+                      <td className="py-3 px-4 text-gray-600">{formatPriceWithDiscount(item)}</td>
+                    </tr>
+                  ))}
+                  {enabledFees.map(item => (
+                    <tr key={item.id || item.name} className="border-b border-gray-100 last:border-b-0">
+                      <td className="py-3 px-4 font-medium text-gray-700">{item.name}</td>
+                      <td className="py-3 px-4 text-gray-500">{item.unit.includes('year') ? 'Annual' : item.unit.includes('property') ? 'One-time/property' : 'Monthly'}</td>
+                      <td className="py-3 px-4 text-gray-600">{formatPriceWithDiscount(item)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
 
           {enabledTerms.length > 0 && (
             <div className="mb-6">
-              <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mb-3">
-                <h2 className="text-sm font-bold text-orange-500 uppercase tracking-wide">Terms & Conditions</h2>
-              </div>
-              <ul className="space-y-2 pl-1">
+              <ul className="space-y-3 text-sm text-gray-600">
                 {enabledTerms.map(term => (
-                  <li key={term.id} className="flex items-start gap-2 text-sm text-gray-600">
-                    <span className="text-orange-500 mt-1">•</span>
+                  <li key={term.id} className="flex items-start gap-2">
+                    <span className="text-orange-500 mt-0.5">•</span>
                     <span>{renderTermText(term)}</span>
                   </li>
                 ))}
@@ -588,9 +613,9 @@ export default function App() {
             </div>
           )}
 
-          <div className="mt-16 pt-8 border-t border-gray-200">
+          <div className="mt-12 pt-8 border-t border-gray-200">
             <p className="text-sm text-gray-600 mb-6">
-              This Order Form is entered into by and between Folio Services, Inc. ("Folio") and the Customer identified herein ("Customer") pursuant to, and is governed by the terms of the Master Services Terms and Conditions attached as Exhibit 3 (the "Master Terms")
+              This Order Form is entered into by and between Folio Services, Inc. ("Folio") and the Customer identified herein ("Customer") pursuant to, and is governed by the terms of the Master Services Terms and Conditions attached as Exhibit 2 (the "Master Terms")
             </p>
             <p className="text-sm text-gray-600 mb-10">
               The above contract terms are accepted and agreed to as of the date of last signature by an authorized signatory of each party:
@@ -604,12 +629,56 @@ export default function App() {
               </div>
               <div>
                 <div className="border-b border-gray-400 mb-3 h-16"></div>
-                <p className="text-sm"><span className="font-semibold">Name:</span></p>
+                <p className="text-sm"><span className="font-semibold">Name:</span> {customerSignatureName || customerContact}</p>
                 <p className="text-sm"><span className="font-semibold">Company:</span> {customerName}</p>
-                <p className="text-sm"><span className="font-semibold">Title:</span></p>
+                <p className="text-sm"><span className="font-semibold">Title:</span> {customerTitle}</p>
               </div>
             </div>
           </div>
+
+          {showExhibit1 && (
+            <div className="mt-16 pt-8 border-t border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800 mb-6">Exhibit 1: Description of Services</h2>
+              
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-orange-500 uppercase tracking-wide mb-3 bg-gray-50 px-4 py-2 rounded-lg">Buy Capabilities</h3>
+                <div className="space-y-3 text-sm text-gray-600 px-4">
+                  <p><strong>Shop:</strong> Folio allows users to browse and compare products from a curated set of approved suppliers, and then add to a unified Folio cart.</p>
+                  <p><strong>Approve:</strong> Folio supports a streamlined approval workflow based on a set of predetermined rules. If applicable to an order, Approvers receive notice by email before orders submitted by Folio.</p>
+                  <p><strong>Budget:</strong> Folio supports budget import and checkbook visibility at checkout.</p>
+                  <p><strong>Order:</strong> Folio places an order with Supplier or sends PO to supplier for goods purchased on the platform. When available, Buyers can access order status from approval to delivery, and use Folio to record order receipt.</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-orange-500 uppercase tracking-wide mb-3 bg-gray-50 px-4 py-2 rounded-lg">Bills Capabilities</h3>
+                <div className="space-y-3 text-sm text-gray-600 px-4">
+                  <p><strong>Transcribe:</strong> Folio digitizes invoices forwarded to bills@folio.co and maps them to the correct Folio Store</p>
+                  <p><strong>Match:</strong> Folio compares the invoices to Orders placed on platform, if applicable; Folio assigns status such as Matched if Match is found; Match is considered auto-approved; Folio also assigns status as Approved or Needs Review</p>
+                  <p><strong>Review:</strong> Payers can expediently process invoices, and triage exceptions using Folio</p>
+                  <p><strong>Transmit:</strong> Payers can expediently process invoices, and triage exceptions using Folio; Folio can transmit the invoices to HIA in real-time</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-orange-500 uppercase tracking-wide mb-3 bg-gray-50 px-4 py-2 rounded-lg">Pay Capabilities</h3>
+                <div className="space-y-3 text-sm text-gray-600 px-4">
+                  <p><strong>Balance:</strong> Payers can fund an account with Patriot Bank, N.A. and access current balances</p>
+                  <p><strong>Disburse:</strong> Payers can use Folio to issue payment via ACH, check, or Folio Commercial Prepaid Mastercard, depending on the supplier. The Folio Commercial Prepaid Mastercard is issued by Patriot Bank, N.A., Member FDIC, pursuant to a license from Mastercard International.</p>
+                  <p><strong>Earn:</strong> Customer can earn rewards back on select supplier payments; Rewards accrue per Folio Commercial Prepaid Mastercard® payment and, if eligible for rewards, are paid out to funding account monthly</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showExhibit2 && (
+            <div className="mt-12 pt-8 border-t border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Exhibit 2: Master Terms</h2>
+              <p className="text-sm text-gray-600">
+                Folio's Master Terms can be found at <a href="https://folio.co/terms" className="text-orange-500 underline">https://folio.co/terms</a>
+              </p>
+            </div>
+          )}
 
           <div className="mt-10 flex justify-center print:hidden">
             <button onClick={() => window.print()} className="px-8 py-3 bg-gray-800 text-white font-medium rounded-xl hover:bg-gray-900 transition-all flex items-center gap-2">
@@ -622,6 +691,7 @@ export default function App() {
     );
   }
 
+  // Editor View
   return (
     <div className={`min-h-screen ${t.bg} transition-colors duration-500`}>
       <div className={`fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] ${t.glow} via-transparent to-transparent pointer-events-none`} />
@@ -656,7 +726,7 @@ export default function App() {
                 </div>
                 <h3 className={`text-lg font-semibold ${t.text} mb-2`}>No templates yet</h3>
                 <p className={`${t.textMuted} mb-6`}>Save your pricing configurations for quick reuse</p>
-                <button onClick={() => setActiveTab('form')} className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-medium shadow-lg">
+                <button onClick={() => changeTab('form')} className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-medium shadow-lg">
                   Create Your First Template
                 </button>
               </div>
@@ -695,67 +765,33 @@ export default function App() {
               {terms.map(term => (
                 <div key={term.id} className={`p-4 border rounded-xl transition-all ${term.enabled ? t.card : 'opacity-50 ' + t.card}`}>
                   <div className="flex items-start gap-3">
-                    <input 
-                      type="checkbox" 
-                      checked={term.enabled} 
-                      onChange={e => updateTerm(term.id, { enabled: e.target.checked })}
+                    <input type="checkbox" checked={term.enabled} onChange={e => updateTerm(term.id, { enabled: e.target.checked })}
                       onDoubleClick={() => term.enabled && updateTerm(term.id, { editing: true })}
                       className="w-5 h-5 mt-0.5 rounded-md text-orange-500 focus:ring-orange-500/50 cursor-pointer flex-shrink-0" 
-                      title={term.enabled ? "Double-click to edit term" : ""}
-                    />
+                      title={term.enabled ? "Double-click to edit term" : ""} />
                     <div className="flex-1">
                       {term.editing ? (
                         <div className="space-y-2">
-                          <textarea
-                            value={term.text}
-                            onChange={e => updateTerm(term.id, { text: e.target.value })}
-                            className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:border-orange-500/50 min-h-24 ${t.input}`}
-                            autoFocus
-                          />
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => updateTerm(term.id, { editing: false })}
-                              className="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-orange-500 to-amber-600 rounded-lg"
-                            >
-                              Done
-                            </button>
-                          </div>
+                          <textarea value={term.text} onChange={e => updateTerm(term.id, { text: e.target.value })}
+                            className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:border-orange-500/50 min-h-24 ${t.input}`} autoFocus />
+                          <button onClick={() => updateTerm(term.id, { editing: false })}
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-orange-500 to-amber-600 rounded-lg">Done</button>
                         </div>
                       ) : (
-                        <p 
-                          className={`text-sm ${t.textSoft} leading-relaxed`}
+                        <p className={`text-sm ${t.textSoft} leading-relaxed`}
                           onDoubleClick={() => term.enabled && updateTerm(term.id, { editing: true })}
-                          title={term.enabled ? "Double-click to edit" : ""}
-                          style={{ cursor: term.enabled ? 'text' : 'default' }}
-                        >
+                          title={term.enabled ? "Double-click to edit" : ""} style={{ cursor: term.enabled ? 'text' : 'default' }}>
                           {term.text.includes('{properties}') ? (
-                            <>
-                              {term.text.split('{properties}')[0]}
-                              <input 
-                                type="text" 
-                                value={term.properties} 
-                                onChange={e => updateTerm(term.id, { properties: e.target.value })}
-                                className={`w-12 px-2 py-0.5 mx-1 text-sm border rounded-lg text-center focus:outline-none focus:border-orange-500/50 ${t.input}`}
-                              />
-                              {term.text.split('{properties}')[1]}
-                            </>
+                            <>{term.text.split('{properties}')[0]}
+                              <input type="text" value={term.properties} onChange={e => updateTerm(term.id, { properties: e.target.value })}
+                                className={`w-12 px-2 py-0.5 mx-1 text-sm border rounded-lg text-center focus:outline-none focus:border-orange-500/50 ${t.input}`} />
+                              {term.text.split('{properties}')[1]}</>
                           ) : term.text.includes('{waiverDate}') ? (
-                            <>
-                              {term.text.split('{waiverDate}')[0]}
-                              <input 
-                                type="text" 
-                                value={term.waiverDate ? new Date(term.waiverDate + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
-                                onClick={() => {
-                                  const newDate = prompt('Enter date (YYYY-MM-DD):', term.waiverDate);
-                                  if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
-                                    updateTerm(term.id, { waiverDate: newDate });
-                                  }
-                                }}
-                                readOnly
-                                className={`w-32 px-2 py-0.5 mx-1 text-sm border rounded-lg text-center cursor-pointer focus:outline-none focus:border-orange-500/50 ${t.input}`}
-                              />
-                              {term.text.split('{waiverDate}')[1]}
-                            </>
+                            <>{term.text.split('{waiverDate}')[0]}
+                              <input type="text" value={term.waiverDate ? new Date(term.waiverDate + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
+                                onClick={() => { const newDate = prompt('Enter date (YYYY-MM-DD):', term.waiverDate); if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) { updateTerm(term.id, { waiverDate: newDate }); } }}
+                                readOnly className={`w-32 px-2 py-0.5 mx-1 text-sm border rounded-lg text-center cursor-pointer focus:outline-none focus:border-orange-500/50 ${t.input}`} />
+                              {term.text.split('{waiverDate}')[1]}</>
                           ) : term.text}
                         </p>
                       )}
@@ -765,10 +801,20 @@ export default function App() {
               ))}
             </div>
             
-            <div className={`mt-6 pt-6 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
-              <p className={`text-xs ${t.textMuted}`}>
-                <span className="font-medium">Note:</span> These terms will appear in the generated order form. Master Terms are always referenced via Exhibit 2.
-              </p>
+            <div className={`mt-8 pt-6 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
+              <h3 className={`text-sm font-semibold ${t.text} mb-4`}>Exhibits</h3>
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={showExhibit1} onChange={e => setShowExhibit1(e.target.checked)}
+                    className="w-5 h-5 rounded-md text-orange-500 focus:ring-orange-500/50" />
+                  <span className={`text-sm ${t.textSoft}`}>Include Exhibit 1: Description of Services</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={showExhibit2} onChange={e => setShowExhibit2(e.target.checked)}
+                    className="w-5 h-5 rounded-md text-orange-500 focus:ring-orange-500/50" />
+                  <span className={`text-sm ${t.textSoft}`}>Include Exhibit 2: Master Terms</span>
+                </label>
+              </div>
             </div>
           </div>
         ) : (
@@ -802,8 +848,7 @@ export default function App() {
             <div className="grid grid-cols-2 gap-6">
               <Section title="Customer Information" icon="👤" theme={t}>
                 <TextField label="Customer Name" value={customerName} onChange={setCustomerName} placeholder="Company name" theme={t} />
-                <TextField label="Address Line 1" value={customerAddress} onChange={setCustomerAddress} placeholder="Street address" theme={t} />
-                <TextField label="Address Line 2" value={customerAddressLine2} onChange={setCustomerAddressLine2} placeholder="City, State ZIP" theme={t} />
+                <TextArea label="Address" value={customerAddress} onChange={setCustomerAddress} placeholder="Full address including city, state, zip" theme={t} rows={2} />
                 <TextField label="Contact Name" value={customerContact} onChange={setCustomerContact} placeholder="Primary contact" theme={t} />
                 <TextField label="Contact Email" value={customerEmail} onChange={setCustomerEmail} placeholder="email@company.com" theme={t} />
               </Section>
@@ -813,9 +858,9 @@ export default function App() {
                   <input type="checkbox" checked={billingSame} onChange={e => handleBillingSame(e.target.checked)} className="w-5 h-5 rounded-md text-orange-500" />
                   <span className={`text-sm ${t.textMuted} group-hover:text-orange-400 transition-colors`}>Same as customer</span>
                 </label>
-                <TextField label="Bill To" value={billingBillTo} onChange={setBillingBillTo} placeholder="Billing contact" theme={t} />
-                <TextField label="Billing Address" value={billingAddress} onChange={setBillingAddress} placeholder="Street address" theme={t} />
-                <TextField label="Address Line 2" value={billingAddressLine2} onChange={setBillingAddressLine2} placeholder="City, State ZIP" theme={t} />
+                <TextField label="Bill To" value={billingBillTo} onChange={setBillingBillTo} placeholder="Billing contact name" theme={t} />
+                <TextArea label="Billing Address" value={billingAddress} onChange={setBillingAddress} placeholder="Full billing address" theme={t} rows={2} />
+                <TextField label="Billing Contact Name" value={billingContactName} onChange={setBillingContactName} placeholder="Contact name" theme={t} />
                 <TextField label="Invoice Email" value={billingEmail} onChange={setBillingEmail} placeholder="billing@company.com" theme={t} />
               </Section>
             </div>
@@ -851,9 +896,10 @@ export default function App() {
 
             <Section title="Package Details" icon="📦" theme={t}>
               <div className="grid grid-cols-2 gap-4">
-                <TextField label="Plan Name" value={planName} onChange={setPlanName} placeholder="e.g., F&B Bundle" theme={t} />
-                <TextField label="Plan Description" value={planDescription} onChange={setPlanDescription} placeholder="e.g., Full Access" theme={t} />
+                <TextField label="Plan Name" value={planName} onChange={setPlanName} placeholder="e.g., Buy & Inventory Pilot Package" theme={t} />
+                <TextField label="Free Usage" value={freeUsage} onChange={setFreeUsage} placeholder="e.g., 1-year-No-Cost Trial Period for up to 1 property" theme={t} />
               </div>
+              <TextField label="Services Reference" value={servicesRef} onChange={setServicesRef} placeholder="Detailed in Exhibit 1" theme={t} />
             </Section>
 
             <Section title="Product Fees" icon="🏷️" theme={t}>
@@ -861,6 +907,11 @@ export default function App() {
                 <div className="col-span-1"></div><div className="col-span-3">Product</div><div className="col-span-3">Price</div><div className="col-span-2">Discount</div><div className="col-span-2">Final</div><div className="col-span-1"></div>
               </div>
               {products.map(item => <ProductRow key={item.id} item={item} theme={t} showUnitDropdown onUpdate={u => setProducts(prev => prev.map(p => p.id === item.id ? u : p))} />)}
+              
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-white/10">
+                <TextField label="Monthly Fee Description (for generated form)" value={monthlyFeeDescription} onChange={setMonthlyFeeDescription} placeholder="$150/property/mo per Active Property" theme={t} />
+                <TextField label="Optional Add-ons" value={optionalAddons} onChange={setOptionalAddons} placeholder="e.g., Folio Inventory - Additional $180/mo/Active Property" theme={t} />
+              </div>
             </Section>
 
             <Section title="Integrations" icon="🔗" theme={t}>
@@ -917,6 +968,13 @@ export default function App() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                 Add Tier
               </button>
+            </Section>
+
+            <Section title="Customer Signature" icon="✍️" theme={t}>
+              <div className="grid grid-cols-2 gap-4">
+                <TextField label="Customer Signatory Name" value={customerSignatureName} onChange={setCustomerSignatureName} placeholder="Leave blank to use contact name" theme={t} />
+                <TextField label="Customer Title" value={customerTitle} onChange={setCustomerTitle} placeholder="e.g., VP of Finance" theme={t} />
+              </div>
             </Section>
 
             <div className="flex justify-center mt-10 mb-8">
