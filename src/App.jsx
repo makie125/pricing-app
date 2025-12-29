@@ -249,9 +249,14 @@ const ProductRow = ({ item, onUpdate, showDelete, onDelete, theme, showUnitDropd
 };
 
 export default function App() {
+  const getInitialTab = () => {
+    const hash = window.location.hash.replace('#', '');
+    return ['form', 'terms', 'templates'].includes(hash) ? hash : 'form';
+  };
+  
   const [darkMode, setDarkMode] = useState(false);
   const [view, setView] = useState('input');
-  const [activeTab, setActiveTab] = useState('form');
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [templates, setTemplates] = useState([]);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState('');
@@ -302,6 +307,22 @@ export default function App() {
   const updateTerm = (id, updates) => {
     setTerms(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
   };
+
+  const changeTab = (tab) => {
+    setActiveTab(tab);
+    window.location.hash = tab;
+  };
+
+  React.useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (['form', 'terms', 'templates'].includes(hash)) {
+        setActiveTab(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const t = darkMode ? {
     dark: true,
@@ -364,6 +385,7 @@ export default function App() {
     setCustomIntegrations(d.customIntegrations); setCustomFees(d.customFees); setMinimumUsage(d.minimumUsage);
     if (d.terms) setTerms(d.terms);
     setActiveTab('form');
+    window.location.hash = 'form';
   };
 
   const formatDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
@@ -591,7 +613,7 @@ export default function App() {
       <div className="max-w-5xl mx-auto px-6 py-8 relative">
         <div className={`flex gap-2 p-1.5 backdrop-blur rounded-2xl mb-8 w-fit border ${t.card}`}>
           {['form', 'terms', 'templates'].map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)}
+            <button key={tab} onClick={() => changeTab(tab)}
               className={`px-6 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 ${activeTab === tab ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg shadow-orange-500/25' : t.textMuted + ' hover:' + t.textSoft}`}>
               {tab === 'form' ? 'Order Form' : tab === 'terms' ? 'Terms' : 'Templates'}
               {tab === 'templates' && templates.length > 0 && <span className="ml-2 px-2 py-0.5 text-xs bg-white/20 rounded-full">{templates.length}</span>}
