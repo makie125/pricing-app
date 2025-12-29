@@ -287,13 +287,14 @@ export default function App() {
   
   // Package
   const [planName, setPlanName] = useState(() => loadSaved('planName', ''));
-  const [freeUsage, setFreeUsage] = useState(() => loadSaved('freeUsage', ''));
+  const [customPlanName, setCustomPlanName] = useState(() => loadSaved('customPlanName', ''));
+  const [freeUsageDuration, setFreeUsageDuration] = useState(() => loadSaved('freeUsageDuration', ''));
+  const [freeUsageProperties, setFreeUsageProperties] = useState(() => loadSaved('freeUsageProperties', '1'));
   const [servicesRef, setServicesRef] = useState(() => loadSaved('servicesRef', 'Detailed in Exhibit 1'));
   
   // Products & Fees
   const [products, setProducts] = useState(() => loadSaved('products', initialProducts));
-  const [monthlyFeeDescription, setMonthlyFeeDescription] = useState(() => loadSaved('monthlyFeeDescription', '$150/property/mo per Active Property'));
-  const [optionalAddons, setOptionalAddons] = useState(() => loadSaved('optionalAddons', ''));
+  const [optionalAddons, setOptionalAddons] = useState(() => loadSaved('optionalAddons', []));
   const [integrations, setIntegrations] = useState(() => loadSaved('integrations', initialIntegrations));
   const [additionalFees, setAdditionalFees] = useState(() => loadSaved('additionalFees', initialFees));
   const [customIntegrations, setCustomIntegrations] = useState(() => loadSaved('customIntegrations', []));
@@ -348,8 +349,8 @@ export default function App() {
       darkMode, templates, customerName, customerAddress, customerContact, customerEmail,
       billingSame, billingBillTo, billingAddress, billingContactName, billingEmail,
       quoteDate, expiryDate, startDate, initialTerm, renewalTerm, paymentTerms, billingFrequency,
-      planName, freeUsage, servicesRef, products, monthlyFeeDescription, optionalAddons,
-      integrations, additionalFees, customIntegrations, customFees, minimumUsage,
+      planName, customPlanName, freeUsageDuration, freeUsageProperties, servicesRef, 
+      products, optionalAddons, integrations, additionalFees, customIntegrations, customFees, minimumUsage,
       customerSignatureName, customerTitle, terms, showExhibit1, showExhibit2
     };
     Object.entries(data).forEach(([key, value]) => {
@@ -362,8 +363,8 @@ export default function App() {
   }, [darkMode, templates, customerName, customerAddress, customerContact, customerEmail,
       billingSame, billingBillTo, billingAddress, billingContactName, billingEmail,
       quoteDate, expiryDate, startDate, initialTerm, renewalTerm, paymentTerms, billingFrequency,
-      planName, freeUsage, servicesRef, products, monthlyFeeDescription, optionalAddons,
-      integrations, additionalFees, customIntegrations, customFees, minimumUsage,
+      planName, customPlanName, freeUsageDuration, freeUsageProperties, servicesRef,
+      products, optionalAddons, integrations, additionalFees, customIntegrations, customFees, minimumUsage,
       customerSignatureName, customerTitle, terms, showExhibit1, showExhibit2]);
 
   const t = darkMode ? {
@@ -397,8 +398,8 @@ export default function App() {
       setBillingSame(false); setBillingBillTo(''); setBillingAddress(''); setBillingContactName(''); setBillingEmail('');
       setQuoteDate(new Date().toISOString().split('T')[0]); setExpiryDate(getDefaultExpiry(new Date().toISOString().split('T')[0])); setStartDate('');
       setInitialTerm('12 months'); setRenewalTerm('1 year'); setPaymentTerms('Net 30'); setBillingFrequency('Monthly');
-      setPlanName(''); setFreeUsage(''); setServicesRef('Detailed in Exhibit 1');
-      setProducts(initialProducts); setMonthlyFeeDescription('$150/property/mo per Active Property'); setOptionalAddons('');
+      setPlanName(''); setCustomPlanName(''); setFreeUsageDuration(''); setFreeUsageProperties('1'); setServicesRef('Detailed in Exhibit 1');
+      setProducts(initialProducts); setOptionalAddons([]);
       setIntegrations(initialIntegrations); setAdditionalFees(initialFees);
       setCustomIntegrations([]); setCustomFees([]); setMinimumUsage(initialTiers);
       setCustomerSignatureName(''); setCustomerTitle('');
@@ -410,8 +411,8 @@ export default function App() {
     if (!newTemplateName.trim()) return;
     setTemplates(prev => [...prev, {
       id: `t-${Date.now()}`, name: newTemplateName.trim(), createdAt: new Date().toISOString(),
-      data: { initialTerm, renewalTerm, paymentTerms, billingFrequency, planName, freeUsage, servicesRef,
-        products, monthlyFeeDescription, optionalAddons, integrations, additionalFees, customIntegrations,
+      data: { initialTerm, renewalTerm, paymentTerms, billingFrequency, planName, customPlanName, freeUsageDuration, freeUsageProperties, servicesRef,
+        products, optionalAddons, integrations, additionalFees, customIntegrations,
         customFees, minimumUsage, terms, showExhibit1, showExhibit2 }
     }]);
     setNewTemplateName(''); setShowTemplateModal(false);
@@ -421,10 +422,11 @@ export default function App() {
     const d = tmpl.data;
     setInitialTerm(d.initialTerm); setRenewalTerm(d.renewalTerm); setPaymentTerms(d.paymentTerms);
     setBillingFrequency(d.billingFrequency); setPlanName(d.planName);
-    if (d.freeUsage !== undefined) setFreeUsage(d.freeUsage);
+    if (d.customPlanName !== undefined) setCustomPlanName(d.customPlanName);
+    if (d.freeUsageDuration !== undefined) setFreeUsageDuration(d.freeUsageDuration);
+    if (d.freeUsageProperties !== undefined) setFreeUsageProperties(d.freeUsageProperties);
     if (d.servicesRef !== undefined) setServicesRef(d.servicesRef);
     setProducts(d.products); 
-    if (d.monthlyFeeDescription !== undefined) setMonthlyFeeDescription(d.monthlyFeeDescription);
     if (d.optionalAddons !== undefined) setOptionalAddons(d.optionalAddons);
     setIntegrations(d.integrations); setAdditionalFees(d.additionalFees);
     setCustomIntegrations(d.customIntegrations); setCustomFees(d.customFees); setMinimumUsage(d.minimumUsage);
@@ -452,6 +454,31 @@ export default function App() {
 
   // Preview/Generated Form
   if (view === 'preview') {
+    const getDisplayPlanName = () => planName === 'custom' ? customPlanName : planName;
+    
+    const getFreeUsageText = () => {
+      if (!freeUsageDuration) return '';
+      return `${freeUsageDuration}-No-Cost Trial Period for up to ${freeUsageProperties} ${parseInt(freeUsageProperties) === 1 ? 'property' : 'properties'}`;
+    };
+
+    const getMonthlyFeeDescription = () => {
+      const enabledWithPrice = products.filter(p => p.enabled && p.price);
+      if (enabledWithPrice.length === 0) return '';
+      return enabledWithPrice.map(p => {
+        const finalPrice = p.discount ? calcDiscounted(p.price, p.discount) : p.price;
+        return `${formatCurrency(finalPrice)}${p.unit} per Active Property`;
+      }).join(', ');
+    };
+
+    const getOptionalAddonsText = () => {
+      const validAddons = optionalAddons.filter(a => a.name && a.price);
+      if (validAddons.length === 0) return '';
+      return validAddons.map(a => {
+        const name = a.productId === 'custom' ? a.customName : a.name;
+        return `${name} - Additional ${formatCurrency(a.price)}${a.unit}`;
+      }).join('; ');
+    };
+
     const enabledProducts = products.filter(p => p.enabled);
     const enabledIntegrations = [...integrations.filter(p => p.enabled), ...customIntegrations.filter(p => p.name)];
     const enabledFees = [...additionalFees.filter(p => p.enabled), ...customFees.filter(p => p.name)];
@@ -534,12 +561,12 @@ export default function App() {
             { label: 'Invoice Email:', value: billingEmail },
           ]} />
 
-          {(planName || freeUsage) && (
+          {(getDisplayPlanName() || getFreeUsageText()) && (
             <>
               <h2 className="text-lg font-semibold text-gray-700 mb-4">Folio Platform Access</h2>
               <SectionTable title="Folio Package" rows={[
-                ...(planName ? [{ label: 'Plan:', value: planName }] : []),
-                ...(freeUsage ? [{ label: 'Free Usage:', value: freeUsage }] : []),
+                ...(getDisplayPlanName() ? [{ label: 'Plan:', value: getDisplayPlanName() }] : []),
+                ...(getFreeUsageText() ? [{ label: 'Free Usage:', value: getFreeUsageText() }] : []),
                 ...(servicesRef ? [{ label: 'Services:', value: servicesRef }] : []),
               ]} />
             </>
@@ -563,10 +590,10 @@ export default function App() {
                   </h2>
                 </div>
                 <div className="p-4 space-y-2 text-sm text-gray-600">
-                  {monthlyFeeDescription && (
+                  {getMonthlyFeeDescription() && (
                     <div className="flex">
                       <span className="text-orange-500 mr-2">●</span>
-                      <span><strong>Monthly fees:</strong> {monthlyFeeDescription}</span>
+                      <span><strong>Monthly fees:</strong> {getMonthlyFeeDescription()}</span>
                     </div>
                   )}
                   {minimumUsage.filter(t => t.amount).length > 0 && (
@@ -591,10 +618,10 @@ export default function App() {
                       <span><strong>Services:</strong> {servicesRef}</span>
                     </div>
                   )}
-                  {optionalAddons && (
+                  {getOptionalAddonsText() && (
                     <div className="flex">
                       <span className="text-orange-500 mr-2">●</span>
-                      <span><strong><em>Optional:</em></strong> {optionalAddons}</span>
+                      <span><strong><em>Optional:</em></strong> {getOptionalAddonsText()}</span>
                     </div>
                   )}
                 </div>
@@ -936,10 +963,60 @@ export default function App() {
 
             <Section title="Package Details" icon="📦" theme={t}>
               <div className="grid grid-cols-2 gap-4">
-                <TextField label="Plan Name" value={planName} onChange={setPlanName} placeholder="e.g., Buy & Inventory Pilot Package" theme={t} />
-                <TextField label="Free Usage" value={freeUsage} onChange={setFreeUsage} placeholder="e.g., 1-year-No-Cost Trial Period for up to 1 property" theme={t} />
+                <div className="mb-4">
+                  <label className={`block text-xs font-medium mb-2 uppercase tracking-wider ${t.textMuted}`}>Plan Name</label>
+                  <select value={planName} onChange={e => setPlanName(e.target.value)} 
+                    className={`w-full px-4 py-3 text-sm border rounded-xl focus:outline-none cursor-pointer ${t.input}`}>
+                    <option value="" className={t.select}>Select a plan...</option>
+                    <option value="Buy & Inventory Pilot Package" className={t.select}>Buy & Inventory Pilot Package</option>
+                    <option value="F&B Bundle" className={t.select}>F&B Bundle</option>
+                    <option value="Full Platform Access" className={t.select}>Full Platform Access</option>
+                    <option value="Buy Only" className={t.select}>Buy Only</option>
+                    <option value="Bills Only" className={t.select}>Bills Only</option>
+                    <option value="Pay Only" className={t.select}>Pay Only</option>
+                    <option value="custom" className={t.select}>Custom...</option>
+                  </select>
+                  {planName === 'custom' && (
+                    <input type="text" value={customPlanName} onChange={e => setCustomPlanName(e.target.value)} 
+                      placeholder="Enter custom plan name" 
+                      className={`w-full px-4 py-3 text-sm border rounded-xl focus:outline-none mt-2 ${t.input} ${t.inputFocus}`} />
+                  )}
+                </div>
+                <div className="mb-4">
+                  <label className={`block text-xs font-medium mb-2 uppercase tracking-wider ${t.textMuted}`}>Services Reference</label>
+                  <select value={servicesRef} onChange={e => setServicesRef(e.target.value)} 
+                    className={`w-full px-4 py-3 text-sm border rounded-xl focus:outline-none cursor-pointer ${t.input}`}>
+                    <option value="Detailed in Exhibit 1" className={t.select}>Detailed in Exhibit 1</option>
+                    <option value="" className={t.select}>None</option>
+                  </select>
+                </div>
               </div>
-              <TextField label="Services Reference" value={servicesRef} onChange={setServicesRef} placeholder="Detailed in Exhibit 1" theme={t} />
+              
+              <div className="mb-4">
+                <label className={`block text-xs font-medium mb-2 uppercase tracking-wider ${t.textMuted}`}>Free Usage Period</label>
+                <div className="grid grid-cols-3 gap-3">
+                  <select value={freeUsageDuration} onChange={e => setFreeUsageDuration(e.target.value)} 
+                    className={`px-4 py-3 text-sm border rounded-xl focus:outline-none cursor-pointer ${t.input}`}>
+                    <option value="" className={t.select}>No free usage</option>
+                    <option value="1 month" className={t.select}>1 month</option>
+                    <option value="3 months" className={t.select}>3 months</option>
+                    <option value="6 months" className={t.select}>6 months</option>
+                    <option value="1 year" className={t.select}>1 year</option>
+                    <option value="2 years" className={t.select}>2 years</option>
+                  </select>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm ${t.textMuted}`}>up to</span>
+                    <input type="number" min="1" value={freeUsageProperties} onChange={e => setFreeUsageProperties(e.target.value)} 
+                      className={`w-20 px-3 py-3 text-sm border rounded-xl focus:outline-none text-center ${t.input}`} />
+                    <span className={`text-sm ${t.textMuted}`}>properties</span>
+                  </div>
+                </div>
+                {freeUsageDuration && (
+                  <p className={`mt-2 text-sm ${t.textSoft} italic`}>
+                    Preview: "{freeUsageDuration}-No-Cost Trial Period for up to {freeUsageProperties} {parseInt(freeUsageProperties) === 1 ? 'property' : 'properties'}"
+                  </p>
+                )}
+              </div>
             </Section>
 
             <Section title="Product Fees" icon="🏷️" theme={t}>
@@ -948,9 +1025,72 @@ export default function App() {
               </div>
               {products.map(item => <ProductRow key={item.id} item={item} theme={t} showUnitDropdown onUpdate={u => setProducts(prev => prev.map(p => p.id === item.id ? u : p))} />)}
               
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-white/10">
-                <TextField label="Monthly Fee Description (for generated form)" value={monthlyFeeDescription} onChange={setMonthlyFeeDescription} placeholder="$150/property/mo per Active Property" theme={t} />
-                <TextField label="Optional Add-ons" value={optionalAddons} onChange={setOptionalAddons} placeholder="e.g., Folio Inventory - Additional $180/mo/Active Property" theme={t} />
+              {products.some(p => p.enabled && p.price) && (
+                <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
+                  <p className={`text-xs ${t.textMuted} mb-2`}>Auto-generated monthly fee description:</p>
+                  <p className={`text-sm ${t.textSoft} italic bg-orange-500/10 px-3 py-2 rounded-lg`}>
+                    {products.filter(p => p.enabled && p.price).map(p => {
+                      const finalPrice = p.discount ? calcDiscounted(p.price, p.discount) : p.price;
+                      return `${formatCurrency(finalPrice)}${p.unit} per Active Property`;
+                    }).join(', ')}
+                  </p>
+                </div>
+              )}
+              
+              <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <label className={`text-xs font-medium uppercase tracking-wider ${t.textMuted}`}>Optional Add-ons</label>
+                </div>
+                {optionalAddons.map((addon, idx) => (
+                  <div key={addon.id} className={`grid grid-cols-12 gap-3 items-center py-2 ${idx > 0 ? 'border-t ' + (darkMode ? 'border-white/5' : 'border-gray-100') : ''}`}>
+                    <div className="col-span-4">
+                      <select value={addon.productId} onChange={e => setOptionalAddons(prev => prev.map(a => a.id === addon.id ? {...a, productId: e.target.value, name: products.find(p => p.id === e.target.value)?.name || e.target.value} : a))}
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none ${t.input}`}>
+                        <option value="" className={t.select}>Select product...</option>
+                        {products.filter(p => !p.enabled).map(p => (
+                          <option key={p.id} value={p.id} className={t.select}>{p.name}</option>
+                        ))}
+                        <option value="custom" className={t.select}>Custom...</option>
+                      </select>
+                      {addon.productId === 'custom' && (
+                        <input type="text" value={addon.customName || ''} onChange={e => setOptionalAddons(prev => prev.map(a => a.id === addon.id ? {...a, customName: e.target.value, name: e.target.value} : a))}
+                          placeholder="Custom add-on name" className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none mt-2 ${t.input}`} />
+                      )}
+                    </div>
+                    <div className="col-span-3">
+                      <div className="flex items-center gap-1">
+                        <span className={t.textMuted}>$</span>
+                        <input type="text" inputMode="decimal" value={addon.price} placeholder="0.00" 
+                          onChange={e => setOptionalAddons(prev => prev.map(a => a.id === addon.id ? {...a, price: e.target.value} : a))}
+                          className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none ${t.input}`} />
+                      </div>
+                    </div>
+                    <div className="col-span-3">
+                      <select value={addon.unit} onChange={e => setOptionalAddons(prev => prev.map(a => a.id === addon.id ? {...a, unit: e.target.value} : a))}
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none ${t.input}`}>
+                        <option value="/mo/Active Property" className={t.select}>/mo/Active Property</option>
+                        <option value="/property/mo" className={t.select}>/property/mo</option>
+                        <option value="/mo" className={t.select}>/mo</option>
+                      </select>
+                    </div>
+                    <div className="col-span-2">
+                      <button onClick={() => setOptionalAddons(prev => prev.filter(a => a.id !== addon.id))} 
+                        className="text-red-400/60 hover:text-red-400 transition-colors">✕</button>
+                    </div>
+                  </div>
+                ))}
+                {optionalAddons.length > 0 && optionalAddons.some(a => a.name && a.price) && (
+                  <p className={`mt-2 text-sm ${t.textSoft} italic bg-orange-500/10 px-3 py-2 rounded-lg`}>
+                    Preview: {optionalAddons.filter(a => a.name && a.price).map(a => 
+                      `${a.productId === 'custom' ? a.customName : a.name} - Additional ${formatCurrency(a.price)}${a.unit}`
+                    ).join('; ')}
+                  </p>
+                )}
+                <button onClick={() => setOptionalAddons(prev => [...prev, { id: `addon-${Date.now()}`, productId: '', name: '', price: '', unit: '/mo/Active Property', customName: '' }])} 
+                  className="mt-3 text-sm text-orange-400 hover:text-orange-300 font-medium flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                  Add Optional Add-on
+                </button>
               </div>
             </Section>
 
