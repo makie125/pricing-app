@@ -288,15 +288,15 @@ export default function App() {
   const [minimumUsage, setMinimumUsage] = useState(initialTiers);
   
   const [terms, setTerms] = useState([
-    { id: 'no-cost-usage', enabled: true, text: 'No Cost Usage period only applies up to {properties} property; clock starts Effective Date of the contract.', properties: '1' },
-    { id: 'integrated-package', enabled: true, text: 'Integrated Package includes access to Folio Buy & Folio Inventory.' },
-    { id: 'production-access', enabled: true, text: 'Production access to commence on the Start date.' },
-    { id: 'auto-renewal', enabled: true, text: 'To ensure no disruption to property operations at the end of the Initial Contract Term, Order Form will automatically convert to a Renewal Contract Term with the minimum usage as outlined within it in the event of non-communication. Written notice to terminate and cease conversion must be provided at least ten (10) days before the end of the then current Term to ops@folio.co.' },
-    { id: 'terminate-convenience', enabled: true, text: 'At any point up to the above notice period, Customer may elect to terminate the Agreement for convenience without cost or penalty.' },
-    { id: 'active-property-def', enabled: true, text: 'Active Property determined by Folio, maintaining access to Customer users after the set Go-Live date.' },
-    { id: 'active-property-30d', enabled: false, text: 'Active Property determined by 30D from the first order. A Property is Active for a minimum of 6 months (excluding the property covered by the Free Usage property). Property can be pre-paid at the start of each yearly renewal for a 10% discount.' },
-    { id: 'manager-admin-fee', enabled: true, text: 'Manager Admin Fee billed at the beginning of the calendar year. Covers expenses associated with (1) nurturing, debugging, and maintaining connectivity to all other technological systems, (2) mirroring policies and adjusting processes in slight ways, as necessary to maintain continuous operations, (3) unlimited requests for reports, (4) 10 Manager access seats to configure suppliers and stores.' },
-    { id: 'property-setup-waived', enabled: true, text: 'Property Setup Fee waived for any Active property live before {waiverDate}. This fee includes supplier mapping and onboarding, access to a training library, and virtual training sessions to ensure users are familiar with Folio.', waiverDate: '2026-12-01' },
+    { id: 'no-cost-usage', enabled: true, text: 'No Cost Usage period only applies up to {properties} property; clock starts Effective Date of the contract.', properties: '1', editing: false },
+    { id: 'integrated-package', enabled: true, text: 'Integrated Package includes access to Folio Buy & Folio Inventory.', editing: false },
+    { id: 'production-access', enabled: true, text: 'Production access to commence on the Start date.', editing: false },
+    { id: 'auto-renewal', enabled: true, text: 'To ensure no disruption to property operations at the end of the Initial Contract Term, Order Form will automatically convert to a Renewal Contract Term with the minimum usage as outlined within it in the event of non-communication. Written notice to terminate and cease conversion must be provided at least ten (10) days before the end of the then current Term to ops@folio.co.', editing: false },
+    { id: 'terminate-convenience', enabled: true, text: 'At any point up to the above notice period, Customer may elect to terminate the Agreement for convenience without cost or penalty.', editing: false },
+    { id: 'active-property-def', enabled: true, text: 'Active Property determined by Folio, maintaining access to Customer users after the set Go-Live date.', editing: false },
+    { id: 'active-property-30d', enabled: false, text: 'Active Property determined by 30D from the first order. A Property is Active for a minimum of 6 months (excluding the property covered by the Free Usage property). Property can be pre-paid at the start of each yearly renewal for a 10% discount.', editing: false },
+    { id: 'manager-admin-fee', enabled: true, text: 'Manager Admin Fee billed at the beginning of the calendar year. Covers expenses associated with (1) nurturing, debugging, and maintaining connectivity to all other technological systems, (2) mirroring policies and adjusting processes in slight ways, as necessary to maintain continuous operations, (3) unlimited requests for reports, (4) 10 Manager access seats to configure suppliers and stores.', editing: false },
+    { id: 'property-setup-waived', enabled: true, text: 'Property Setup Fee waived for any Active property live before {waiverDate}. This fee includes supplier mapping and onboarding, access to a training library, and virtual training sessions to ensure users are familiar with Folio.', waiverDate: '2026-12-01', editing: false },
   ]);
 
   const updateTerm = (id, updates) => {
@@ -651,40 +651,66 @@ export default function App() {
                       type="checkbox" 
                       checked={term.enabled} 
                       onChange={e => updateTerm(term.id, { enabled: e.target.checked })}
+                      onDoubleClick={() => term.enabled && updateTerm(term.id, { editing: true })}
                       className="w-5 h-5 mt-0.5 rounded-md text-orange-500 focus:ring-orange-500/50 cursor-pointer flex-shrink-0" 
+                      title={term.enabled ? "Double-click to edit term" : ""}
                     />
                     <div className="flex-1">
-                      <p className={`text-sm ${t.textSoft} leading-relaxed`}>
-                        {term.text.includes('{properties}') ? (
-                          <>
-                            {term.text.split('{properties}')[0]}
-                            <input 
-                              type="text" 
-                              value={term.properties} 
-                              onChange={e => updateTerm(term.id, { properties: e.target.value })}
-                              className={`w-12 px-2 py-0.5 mx-1 text-sm border rounded-lg text-center focus:outline-none focus:border-orange-500/50 ${t.input}`}
-                            />
-                            {term.text.split('{properties}')[1]}
-                          </>
-                        ) : term.text.includes('{waiverDate}') ? (
-                          <>
-                            {term.text.split('{waiverDate}')[0]}
-                            <input 
-                              type="text" 
-                              value={term.waiverDate ? new Date(term.waiverDate + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
-                              onClick={() => {
-                                const newDate = prompt('Enter date (YYYY-MM-DD):', term.waiverDate);
-                                if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
-                                  updateTerm(term.id, { waiverDate: newDate });
-                                }
-                              }}
-                              readOnly
-                              className={`w-32 px-2 py-0.5 mx-1 text-sm border rounded-lg text-center cursor-pointer focus:outline-none focus:border-orange-500/50 ${t.input}`}
-                            />
-                            {term.text.split('{waiverDate}')[1]}
-                          </>
-                        ) : term.text}
-                      </p>
+                      {term.editing ? (
+                        <div className="space-y-2">
+                          <textarea
+                            value={term.text}
+                            onChange={e => updateTerm(term.id, { text: e.target.value })}
+                            className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:border-orange-500/50 min-h-24 ${t.input}`}
+                            autoFocus
+                          />
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => updateTerm(term.id, { editing: false })}
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-orange-500 to-amber-600 rounded-lg"
+                            >
+                              Done
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p 
+                          className={`text-sm ${t.textSoft} leading-relaxed`}
+                          onDoubleClick={() => term.enabled && updateTerm(term.id, { editing: true })}
+                          title={term.enabled ? "Double-click to edit" : ""}
+                          style={{ cursor: term.enabled ? 'text' : 'default' }}
+                        >
+                          {term.text.includes('{properties}') ? (
+                            <>
+                              {term.text.split('{properties}')[0]}
+                              <input 
+                                type="text" 
+                                value={term.properties} 
+                                onChange={e => updateTerm(term.id, { properties: e.target.value })}
+                                className={`w-12 px-2 py-0.5 mx-1 text-sm border rounded-lg text-center focus:outline-none focus:border-orange-500/50 ${t.input}`}
+                              />
+                              {term.text.split('{properties}')[1]}
+                            </>
+                          ) : term.text.includes('{waiverDate}') ? (
+                            <>
+                              {term.text.split('{waiverDate}')[0]}
+                              <input 
+                                type="text" 
+                                value={term.waiverDate ? new Date(term.waiverDate + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
+                                onClick={() => {
+                                  const newDate = prompt('Enter date (YYYY-MM-DD):', term.waiverDate);
+                                  if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+                                    updateTerm(term.id, { waiverDate: newDate });
+                                  }
+                                }}
+                                readOnly
+                                className={`w-32 px-2 py-0.5 mx-1 text-sm border rounded-lg text-center cursor-pointer focus:outline-none focus:border-orange-500/50 ${t.input}`}
+                              />
+                              {term.text.split('{waiverDate}')[1]}
+                            </>
+                          ) : term.text}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
