@@ -286,6 +286,22 @@ export default function App() {
   const [customIntegrations, setCustomIntegrations] = useState([]);
   const [customFees, setCustomFees] = useState([]);
   const [minimumUsage, setMinimumUsage] = useState(initialTiers);
+  
+  const [terms, setTerms] = useState([
+    { id: 'no-cost-usage', enabled: true, text: 'No Cost Usage period only applies up to {properties} property; clock starts Effective Date of the contract.', properties: '1' },
+    { id: 'integrated-package', enabled: true, text: 'Integrated Package includes access to Folio Buy & Folio Inventory.' },
+    { id: 'production-access', enabled: true, text: 'Production access to commence on the Start date.' },
+    { id: 'auto-renewal', enabled: true, text: 'To ensure no disruption to property operations at the end of the Initial Contract Term, Order Form will automatically convert to a Renewal Contract Term with the minimum usage as outlined within it in the event of non-communication. Written notice to terminate and cease conversion must be provided at least ten (10) days before the end of the then current Term to ops@folio.co.' },
+    { id: 'terminate-convenience', enabled: true, text: 'At any point up to the above notice period, Customer may elect to terminate the Agreement for convenience without cost or penalty.' },
+    { id: 'active-property-def', enabled: true, text: 'Active Property determined by Folio, maintaining access to Customer users after the set Go-Live date.' },
+    { id: 'active-property-30d', enabled: false, text: 'Active Property determined by 30D from the first order. A Property is Active for a minimum of 6 months (excluding the property covered by the Free Usage property). Property can be pre-paid at the start of each yearly renewal for a 10% discount.' },
+    { id: 'manager-admin-fee', enabled: true, text: 'Manager Admin Fee billed at the beginning of the calendar year. Covers expenses associated with (1) nurturing, debugging, and maintaining connectivity to all other technological systems, (2) mirroring policies and adjusting processes in slight ways, as necessary to maintain continuous operations, (3) unlimited requests for reports, (4) 10 Manager access seats to configure suppliers and stores.' },
+    { id: 'property-setup-waived', enabled: true, text: 'Property Setup Fee waived for any Active property live before {waiverDate}. This fee includes supplier mapping and onboarding, access to a training library, and virtual training sessions to ensure users are familiar with Folio.', waiverDate: '2026-12-01' },
+  ]);
+
+  const updateTerm = (id, updates) => {
+    setTerms(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+  };
 
   const t = darkMode ? {
     dark: true,
@@ -335,7 +351,7 @@ export default function App() {
     if (!newTemplateName.trim()) return;
     setTemplates(prev => [...prev, {
       id: `t-${Date.now()}`, name: newTemplateName.trim(), createdAt: new Date().toISOString(),
-      data: { initialTerm, renewalTerm, paymentTerms, billingFrequency, planName, planDescription, products, integrations, additionalFees, customIntegrations, customFees, minimumUsage }
+      data: { initialTerm, renewalTerm, paymentTerms, billingFrequency, planName, planDescription, products, integrations, additionalFees, customIntegrations, customFees, minimumUsage, terms }
     }]);
     setNewTemplateName(''); setShowTemplateModal(false);
   };
@@ -346,6 +362,7 @@ export default function App() {
     setBillingFrequency(d.billingFrequency); setPlanName(d.planName); setPlanDescription(d.planDescription);
     setProducts(d.products); setIntegrations(d.integrations); setAdditionalFees(d.additionalFees);
     setCustomIntegrations(d.customIntegrations); setCustomFees(d.customFees); setMinimumUsage(d.minimumUsage);
+    if (d.terms) setTerms(d.terms);
     setActiveTab('form');
   };
 
@@ -355,6 +372,18 @@ export default function App() {
     const enabledProducts = products.filter(p => p.enabled);
     const enabledIntegrations = [...integrations.filter(p => p.enabled), ...customIntegrations.filter(p => p.name)];
     const enabledFees = [...additionalFees.filter(p => p.enabled), ...customFees.filter(p => p.name)];
+    const enabledTerms = terms.filter(t => t.enabled);
+
+    const renderTermText = (term) => {
+      let text = term.text;
+      if (term.properties) {
+        text = text.replace('{properties}', term.properties);
+      }
+      if (term.waiverDate) {
+        text = text.replace('{waiverDate}', new Date(term.waiverDate + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+      }
+      return text;
+    };
 
     const TableRow = ({ label, value, isLast }) => (
       <div className={`flex ${!isLast ? 'border-b border-gray-200' : ''}`}>
@@ -495,6 +524,22 @@ export default function App() {
             />
           )}
 
+          {enabledTerms.length > 0 && (
+            <div className="mb-6">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mb-3">
+                <h2 className="text-sm font-bold text-orange-500 uppercase tracking-wide">Terms & Conditions</h2>
+              </div>
+              <ul className="space-y-2 pl-1">
+                {enabledTerms.map(term => (
+                  <li key={term.id} className="flex items-start gap-2 text-sm text-gray-600">
+                    <span className="text-orange-500 mt-1">•</span>
+                    <span>{renderTermText(term)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="mt-16 pt-8 border-t border-gray-200">
             <p className="text-sm text-gray-600 mb-6">
               This Order Form is entered into by and between Folio Services, Inc. ("Folio") and the Customer identified herein ("Customer") pursuant to, and is governed by the terms of the Master Services Terms and Conditions attached as Exhibit 3 (the "Master Terms")
@@ -545,10 +590,10 @@ export default function App() {
 
       <div className="max-w-5xl mx-auto px-6 py-8 relative">
         <div className={`flex gap-2 p-1.5 backdrop-blur rounded-2xl mb-8 w-fit border ${t.card}`}>
-          {['form', 'templates'].map(tab => (
+          {['form', 'terms', 'templates'].map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className={`px-6 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 ${activeTab === tab ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg shadow-orange-500/25' : t.textMuted + ' hover:' + t.textSoft}`}>
-              {tab === 'form' ? 'Order Form' : 'Templates'}
+              {tab === 'form' ? 'Order Form' : tab === 'terms' ? 'Terms' : 'Templates'}
               {tab === 'templates' && templates.length > 0 && <span className="ml-2 px-2 py-0.5 text-xs bg-white/20 rounded-full">{templates.length}</span>}
             </button>
           ))}
@@ -585,6 +630,72 @@ export default function App() {
                 </div>
               ))
             )}
+          </div>
+        ) : activeTab === 'terms' ? (
+          <div className={`backdrop-blur-xl border rounded-3xl p-8 ${t.card}`}>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              </div>
+              <div>
+                <h2 className={`text-xl font-semibold ${t.text}`}>Terms & Conditions</h2>
+                <p className={`text-sm ${t.textMuted}`}>Select which terms to include in the order form</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {terms.map(term => (
+                <div key={term.id} className={`p-4 border rounded-xl transition-all ${term.enabled ? t.card : 'opacity-50 ' + t.card}`}>
+                  <div className="flex items-start gap-3">
+                    <input 
+                      type="checkbox" 
+                      checked={term.enabled} 
+                      onChange={e => updateTerm(term.id, { enabled: e.target.checked })}
+                      className="w-5 h-5 mt-0.5 rounded-md text-orange-500 focus:ring-orange-500/50 cursor-pointer flex-shrink-0" 
+                    />
+                    <div className="flex-1">
+                      <p className={`text-sm ${t.textSoft} leading-relaxed`}>
+                        {term.text.includes('{properties}') ? (
+                          <>
+                            {term.text.split('{properties}')[0]}
+                            <input 
+                              type="text" 
+                              value={term.properties} 
+                              onChange={e => updateTerm(term.id, { properties: e.target.value })}
+                              className={`w-12 px-2 py-0.5 mx-1 text-sm border rounded-lg text-center focus:outline-none focus:border-orange-500/50 ${t.input}`}
+                            />
+                            {term.text.split('{properties}')[1]}
+                          </>
+                        ) : term.text.includes('{waiverDate}') ? (
+                          <>
+                            {term.text.split('{waiverDate}')[0]}
+                            <input 
+                              type="text" 
+                              value={term.waiverDate ? new Date(term.waiverDate + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
+                              onClick={() => {
+                                const newDate = prompt('Enter date (YYYY-MM-DD):', term.waiverDate);
+                                if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+                                  updateTerm(term.id, { waiverDate: newDate });
+                                }
+                              }}
+                              readOnly
+                              className={`w-32 px-2 py-0.5 mx-1 text-sm border rounded-lg text-center cursor-pointer focus:outline-none focus:border-orange-500/50 ${t.input}`}
+                            />
+                            {term.text.split('{waiverDate}')[1]}
+                          </>
+                        ) : term.text}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className={`mt-6 pt-6 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
+              <p className={`text-xs ${t.textMuted}`}>
+                <span className="font-medium">Note:</span> These terms will appear in the generated order form. Master Terms are always referenced via Exhibit 2.
+              </p>
+            </div>
           </div>
         ) : (
           <>
