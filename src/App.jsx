@@ -266,8 +266,13 @@ export default function App() {
   const [billingAddress, setBillingAddress] = useState('');
   const [billingAddressLine2, setBillingAddressLine2] = useState('');
   const [billingEmail, setBillingEmail] = useState('');
+  const getDefaultExpiry = (date) => {
+    const d = new Date(date + 'T00:00:00');
+    d.setDate(d.getDate() + 14);
+    return d.toISOString().split('T')[0];
+  };
   const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
-  const [expiryDate, setExpiryDate] = useState('');
+  const [expiryDate, setExpiryDate] = useState(getDefaultExpiry(new Date().toISOString().split('T')[0]));
   const [startDate, setStartDate] = useState('');
   const [initialTerm, setInitialTerm] = useState('12 months');
   const [renewalTerm, setRenewalTerm] = useState('1 year');
@@ -318,7 +323,7 @@ export default function App() {
     if (window.confirm('Clear all form data?')) {
       setCustomerName(''); setCustomerAddress(''); setCustomerAddressLine2(''); setCustomerContact(''); setCustomerEmail('');
       setBillingSame(false); setBillingBillTo(''); setBillingAddress(''); setBillingAddressLine2(''); setBillingEmail('');
-      setQuoteDate(new Date().toISOString().split('T')[0]); setExpiryDate(''); setStartDate('');
+      setQuoteDate(new Date().toISOString().split('T')[0]); setExpiryDate(getDefaultExpiry(new Date().toISOString().split('T')[0])); setStartDate('');
       setInitialTerm('12 months'); setRenewalTerm('1 year'); setPaymentTerms('Net 30'); setBillingFrequency('Monthly');
       setPlanName(''); setPlanDescription('');
       setProducts(initialProducts); setIntegrations(initialIntegrations); setAdditionalFees(initialFees);
@@ -632,7 +637,7 @@ export default function App() {
 
             <div className="grid grid-cols-2 gap-6">
               <Section title="Quote Details" icon="📅" theme={t}>
-                <DatePicker label="Quote Date" value={quoteDate} onChange={setQuoteDate} theme={t} />
+                <DatePicker label="Quote Date" value={quoteDate} onChange={(v) => { setQuoteDate(v); setExpiryDate(getDefaultExpiry(v)); }} theme={t} />
                 <DatePicker label="Quote Expiry" value={expiryDate} onChange={setExpiryDate} theme={t} />
               </Section>
 
