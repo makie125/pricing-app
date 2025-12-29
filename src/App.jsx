@@ -670,7 +670,17 @@ export default function App() {
               </div>
 
               <div className="mb-6">
-                <h3 className="text-sm font-bold text-orange-500 uppercase tracking-wide mb-3 bg-gray-50 px-4 py-2 rounded-lg">Pay Capabilities</h3>
+                <h3 className="text-sm font-bold text-orange-500 uppercase tracking-wide mb-3 bg-gray-50 px-4 py-2 rounded-lg">Folio Inventory Capabilities</h3>
+                <div className="space-y-3 text-sm text-gray-600 px-4">
+                  <p><strong>Count:</strong> Periodic counting, with offline mode. Operators can save and export snapshots of item count and location within Folio; available mobile-first, across every device, including iPad</p>
+                  <p><strong>Link:</strong> Operators can link inventory items to Locations and Par values. There's an interactive surface for associated par values, and seamless links to Folios product catalog.</p>
+                  <p><strong>Transfers:</strong> Operators can transfer inventory items between Locations.</p>
+                  <p><strong>Replenishment:</strong> Operators can easily re-buy Inventory Items through Folio's buy catalog.</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-orange-500 uppercase tracking-wide mb-3 bg-gray-50 px-4 py-2 rounded-lg">Folio Pay Capabilities</h3>
                 <div className="space-y-3 text-sm text-gray-600 px-4">
                   <p><strong>Balance:</strong> Payers can fund an account with Patriot Bank, N.A. and access current balances</p>
                   <p><strong>Disburse:</strong> Payers can use Folio to issue payment via ACH, check, or Folio Commercial Prepaid Mastercard, depending on the supplier. The Folio Commercial Prepaid Mastercard is issued by Patriot Bank, N.A., Member FDIC, pursuant to a license from Mastercard International.</p>
